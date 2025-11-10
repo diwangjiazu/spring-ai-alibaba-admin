@@ -567,8 +567,11 @@ const PlaygroundPage = () => {
   const runSinglePrompt = async (promptInstance, inputText) => {
     const {
       id: promptId, content, parameterValues, selectedModel, modelParams, sessionId, mockTools,
-      enableFn
+      enableFn, selectedPromptId
     } = promptInstance;
+
+    // 根据 selectedPromptId 查找当前 prompt
+    const currentPrompt = prompts.find(p => p.promptKey === selectedPromptId);
 
     const config = {
       promptId,
