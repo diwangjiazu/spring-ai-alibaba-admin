@@ -9,7 +9,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -49,6 +48,9 @@
 
         <maven.deploy.skip>true</maven.deploy.skip>
 
+        <spring-initializr.version>0.21.0</spring-initializr.version>
+        <org.eclipse.jdt.core.version>3.42.0</org.eclipse.jdt.core.version>
+
         <revision>1.0.0-SNAPSHOT</revision>
     </properties>
 
@@ -57,6 +59,64 @@
     <description>Backend implementation of the visualized studio for building applications.</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-studio-server-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-studio-server-openapi</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-graph-core</artifactId>
+            <version>1.0.0.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jsonSchema</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.spring.initializr</groupId>
+            <artifactId>initializr-generator-spring</artifactId>
+            <version>${spring-initializr.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.spring.initializr</groupId>
+            <artifactId>initializr-generator</artifactId>
+            <version>${spring-initializr.version}</version>
+        </dependency>
+
+        <!-- org.eclipse.jdt.core for format -->
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>org.eclipse.jdt.core</artifactId>
+            <version>3.42.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.spring.initializr</groupId>
+            <artifactId>initializr-web</artifactId>
+            <version>${spring-initializr.version}</version>
+        </dependency>
+
         <!-- 核心依赖 - 实际使用 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -117,11 +177,6 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jsonSchema</artifactId>
         </dependency>
 
         <dependency>
