@@ -29,6 +29,12 @@ management:
         version: 1.0
       deployment:
         environment: test
+  endpoints:
+    web:
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
 spring:
   ai:
     chat:
@@ -50,9 +56,6 @@ spring:
         model:
           capture-input: true
           capture-output: true
-
-
-
   servlet:
     multipart:
       max-file-size: 50MB
@@ -60,6 +63,8 @@ spring:
       enabled: true
   application:
     name: saa-studio
+  config:
+    import: classpath:initializr.yml
 
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -82,6 +87,11 @@ spring:
           statement-executable-sql-log-enable: true
           statement-log-error-enabled: true
 
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
   freemarker:
     cache: false
     charset: UTF-8
@@ -89,7 +99,9 @@ spring:
     enabled: true
     content-type: text/html
     template-loader-path: classpath:/templates/
-
+  elasticsearch:
+    uris: http://localhost:9200
+    connection-timeout: 10000
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.alibaba.cloud.ai.studio.admin.entity
@@ -97,7 +109,14 @@ mybatis:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+rocketmq:
+  endpoints: 127.0.0.1:18080
+  document-index-topic: topic_saa_studio_document_index
+  document_index_group: group_saa_studio_document_index
 
+initializr:
+  web:
+    enabled: false
 logging:
   level:
     org.springframework.boot.autoconfigure: INFO

@@ -12,7 +12,7 @@
 
 ## 项目背景
 
-Agent Studio 是一个基于 Spring AI Alibaba 的 AI Agent 开发与评估平台，旨在为开发者和企业提供完整的 AI Agent 生命周期管理解决方案。平台支持从 Prompt 工程、数据集管理、评估器配置到实验执行和结果分析的完整工作流，帮助用户快速构建、测试和优化 AI Agent 应用。
+Spring AI Alibaba Admin 是一个基于 Spring AI Alibaba 的 AI Agent 开发与评估平台，旨在为开发者和企业提供完整的 AI Agent 生命周期管理解决方案。平台支持从 Prompt 工程、数据集管理、评估器配置到实验执行和结果分析的完整工作流，帮助用户快速构建、测试和优化 AI Agent 应用。
 
 
 ## 核心功能
@@ -101,7 +101,7 @@ mvn spring-boot:run
 ```
 ### 5. 访问应用
 
-打开浏览器访问 http://localhost:8080 即可使用 SAA Admin 平台。
+打开浏览器访问 http://localhost:8080/admin 即可使用 SAA Admin 平台。
 
 至此，您已经可以在平台中对prompt进行管理、调试、评估、可观测。如果您期望Spring AI Alibaba Agent应用能够集成Nacos以实现prompt加载以及动态更新，并且观测线上的运行情况，可以参照第六步配置您的 AI Agent 应用。
 

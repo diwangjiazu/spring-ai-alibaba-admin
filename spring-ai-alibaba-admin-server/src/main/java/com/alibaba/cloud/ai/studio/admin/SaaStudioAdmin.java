@@ -20,6 +20,7 @@ import com.alibaba.cloud.ai.studio.admin.builder.generator.GeneratorApplication;
 import com.alibaba.cloud.ai.studio.admin.builder.generator.config.GraphProjectGenerationConfiguration;
 import com.alibaba.cloud.ai.studio.core.config.StudioProperties;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.FilterType;
  */
 // @SpringBootApplication(scanBasePackages = "com.alibaba.cloud.ai.studio")
 @SpringBootApplication
+@MapperScan("com.alibaba.cloud.ai.studio.admin.mapper")
 @ComponentScan(basePackages = { "com.alibaba.cloud.ai.studio" },
 		excludeFilters = {
 				@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
