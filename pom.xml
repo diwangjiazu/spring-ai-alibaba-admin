@@ -26,10 +26,10 @@
     <url>https://github.com/alibaba/spring-ai-alibaba</url>
 
     <modules>
-        <module>spring-ai-alibaba-admin-server</module>
-        <module>spring-ai-alibaba-studio-server-core</module>
-        <module>spring-ai-alibaba-studio-server-runtime</module>
-        <module>spring-ai-alibaba-studio-server-openapi</module>
+        <module>spring-ai-alibaba-admin-server-start</module>
+        <module>spring-ai-alibaba-admin-server-core</module>
+        <module>spring-ai-alibaba-admin-server-runtime</module>
+        <module>spring-ai-alibaba-admin-server-openapi</module>
     </modules>
 
     <scm>
@@ -138,6 +138,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-admin-server-runtime</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-admin-server-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
@@ -194,13 +204,6 @@
                 <artifactId>mybatis-plus-annotation</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
-            </dependency>
-
 
             <dependency>
                 <groupId>com.alibaba.cloud.ai</groupId>
