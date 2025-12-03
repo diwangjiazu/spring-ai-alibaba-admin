@@ -584,6 +584,9 @@ const PlaygroundPage = () => {
       id: promptId, content, parameterValues, selectedModel, modelParams, sessionId, mockTools,
       enableFn
     } = promptInstance;
+    console.log('runSinglePrompt', promptInstance)
+
+    const currentPrompt = prompts.find(p => p.promptKey === promptInstance.selectedPromptId);
 
     const config = {
       promptId,
