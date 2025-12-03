@@ -93,7 +93,7 @@ export const executeStreamingPrompt = async (
     };
 
     let currentMessage = {
-      id: Date.now(),
+      id: `assistant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       promptId,
       type: 'assistant', // 修正类型匹配，与UI中的判断一致
       content: '',
@@ -133,6 +133,7 @@ export const executeStreamingPrompt = async (
     const decoder = new TextDecoder();
     let buffer = '';
     let updateTimeoutId: NodeJS.Timeout | null = null;
+    let hasLoadedHistory = false; // 标记是否已加载历史消息
 
     // Store reader reference for cleanup
     eventSourceRefs[promptId] = { close: () => reader.cancel() };
@@ -193,6 +194,41 @@ export const executeStreamingPrompt = async (
                     sessionId = backendSessionId;
                     currentMessage.sessionId = backendSessionId;
                     onUpdateSessionId(promptId, backendSessionId);
+                  }
+
+                  // Load historical messages only once and only if this is an existing session (not new)
+                  if (!hasLoadedHistory && !isNewSession && data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+                    hasLoadedHistory = true;
+
+                    // 调试：打印原始消息数据
+                    console.log('原始历史消息:', data.messages);
+
+                    // Filter out the last user message (it's the one we just sent)
+                    const messagesToLoad = data.messages.slice(0, -1);
+
+                    console.log('要加载的消息:', messagesToLoad);
+
+                    if (messagesToLoad.length > 0) {
+                      const historicalMessages = messagesToLoad.map((msg: any, index: number) => {
+                        console.log(`消息 ${index}:`, { role: msg.role, content: msg.content?.substring(0, 50) });
+                        return {
+                          id: `${msg.timestamp || Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+                          type: msg.role === 'user' ? 'user' : 'assistant',
+                          content: msg.content,
+                          timestamp: formatTime(msg.timestamp),
+                          model: msg.role === 'assistant' ? selectedModel : undefined,
+                          modelParams: msg.role === 'assistant' ? modelParams : undefined,
+                          isLoading: false
+                        };
+                      });
+
+                      // Prepend historical messages before the current user message and loading AI message
+                      onUpdateChatHistory(promptId, (chatHistory) => {
+                        // Keep the last 2 messages (user message + loading AI message)
+                        const recentMessages = chatHistory.slice(-2);
+                        return [...historicalMessages, ...recentMessages];
+                      });
+                    }
                   }
                 } else if (data.type === "metrics") {
                   updateChatHistory(data.metrics);
