@@ -19,6 +19,7 @@ import {
   message,
   Tooltip,
   Divider,
+  Switch,
 } from 'antd';
 import {
   LoadingOutlined,
@@ -40,6 +41,7 @@ import { executeStreamingPrompt } from '../../utils/streamingPrompt';
 import CreatePromptModal from '../../components/CreatePromptModal';
 import PublishVersionModal from '../../components/PublishVersionModal';
 import TemplateImportModal from '../../components/TemplateImportModal';
+import MarkdownRenderer from '../../components/MarkdownRenderer';
 import API from '../../services';
 import { ModelsContext } from '../../context/models';
 import AddFunctionModal from '../prompts/prompt-detail/add-function-modal/add-function-modal';
@@ -141,9 +143,13 @@ const PlaygroundPage = () => {
     const defaultModelId = models.length > 0 ? models[0].id : '';
     // Always use getModelParams to ensure proper priority system even when models array is empty
     const modelParams = getModelParams(defaultModelId);
+    const instanceId = 1;
+    // 从 localStorage 读取 Markdown 开关状态，默认为 true
+    const savedMarkdownState = localStorage.getItem(`markdown_enabled_${instanceId}`);
+    const enableMarkdown = savedMarkdownState !== null ? JSON.parse(savedMarkdownState) : true;
 
     return {
-      id: 1,
+      id: instanceId,
       promptName: playgroundData?.name || '',
       version: playgroundData?.version || '',
       content: playgroundData?.content || '',
@@ -158,7 +164,8 @@ const PlaygroundPage = () => {
       isContentModified: false, // 标记内容是否被修改
       chatHistory: [], // 独立的对话历史
       sessionId: null, // 会话 ID
-      mockTools: [] // 函数工具列表
+      mockTools: [], // 函数工具列表
+      enableMarkdown: enableMarkdown, // Markdown 渲染开关
     };
   };
 
@@ -534,9 +541,14 @@ const PlaygroundPage = () => {
 
     const promptToCopy = promptInstances.find(p => p.id === promptId);
     if (promptToCopy) {
+      const newId = Date.now();
+      // 从 localStorage 读取新实例的 Markdown 开关状态，默认为 true
+      const savedMarkdownState = localStorage.getItem(`markdown_enabled_${newId}`);
+      const enableMarkdown = savedMarkdownState !== null ? JSON.parse(savedMarkdownState) : true;
+
       const newPrompt = {
         ...promptToCopy,
-        id: Date.now(),
+        id: newId,
         promptName: '', // 置空promptName
         version: '', // 置空version
         content: promptToCopy.content, // 保留内容
@@ -551,7 +563,8 @@ const PlaygroundPage = () => {
         isContentModified: false,
         chatHistory: [], // 新窗口独立的对话历史
         sessionId: null, // 新的会话 ID
-        mockTools: [] // 函数工具列表
+        mockTools: [], // 函数工具列表
+        enableMarkdown: enableMarkdown, // Markdown 渲染开关
       };
       setPromptInstances(prev => [...prev, newPrompt]);
     }
@@ -559,6 +572,8 @@ const PlaygroundPage = () => {
 
   const removePrompt = (promptId) => {
     if (promptInstances.length > 1) {
+      // 删除 localStorage 中的 Markdown 配置
+      localStorage.removeItem(`markdown_enabled_${promptId}`);
       setPromptInstances(prev => prev.filter(p => p.id !== promptId));
     }
   };
@@ -1353,6 +1368,22 @@ const PlaygroundPage = () => {
                           </div>
                         </div>
                         <Space>
+                          <div className="flex items-center gap-2">
+                            <Text type="secondary" style={{ fontSize: '12px' }}>Markdown</Text>
+                            <Switch
+                              size="small"
+                              checked={prompt.enableMarkdown !== false}
+                              onChange={(checked) => {
+                                setPromptInstances(prev => prev.map(p =>
+                                  p.id === prompt.id
+                                    ? { ...p, enableMarkdown: checked }
+                                    : p
+                                ));
+                                // 持久化到 localStorage
+                                localStorage.setItem(`markdown_enabled_${prompt.id}`, JSON.stringify(checked));
+                              }}
+                            />
+                          </div>
                           {recentlyDeletedSessions[prompt.id] && (
                             <Button
                               type="text"
@@ -1482,14 +1513,17 @@ const PlaygroundPage = () => {
                                       }}>
                                         {message.isLoading ? (
                                           <div>
-                                            <Text style={{
+                                              <div style={{
                                               fontSize: '13px',
-                                              whiteSpace: 'pre-wrap',
                                               lineHeight: '1.5',
                                               color: '#262626'
                                             }}>
-                                              {message.content}
-                                            </Text>
+                                              {prompt.enableMarkdown !== false ? (
+                                                <MarkdownRenderer content={message.content}/>
+                                              ) : (
+                                                <Text style={{ whiteSpace: 'pre-wrap' }}>{message.content}</Text>
+                                              )}
+                                          </div>
                                             {/* 流式输入闪烁光标 */}
                                             <span style={{
                                               display: 'inline-block',
@@ -1502,14 +1536,17 @@ const PlaygroundPage = () => {
                                           </div>
                                         ) : (
                                           <>
-                                            <Text style={{
+                                            <div style={{
                                               fontSize: '13px',
-                                              whiteSpace: 'pre-wrap',
                                               lineHeight: '1.5',
                                               color: '#262626'
                                             }}>
-                                              {message.content}
-                                            </Text>
+                                            {prompt.enableMarkdown !== false ? (
+                                              <MarkdownRenderer content={message.content}/>
+                                            ) : (
+                                              <Text style={{ whiteSpace: 'pre-wrap' }}>{message.content}</Text>
+                                            )}
+                                            </div>
                                             <div className='flex gap-2 mt-2'>
                                               <Tag color="geekblue">输入 Token: {message?.usage?.promptTokens}</Tag>
                                               <Tag color='geekblue'>输出 Token: {message?.usage?.completionTokens}</Tag>
