@@ -4,6 +4,9 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,10 +29,22 @@ public class ElasticsearchConfig {
                     requestConfigBuilder
                         .setConnectTimeout(properties.getConnectTimeout())
                         .setSocketTimeout(properties.getSocketTimeout()))
-                .setHttpClientConfigCallback(httpClientBuilder -> 
-                    httpClientBuilder
-                        .setMaxConnTotal(properties.getConnectionPool().getMaxConnections())
-                        .setMaxConnPerRoute(properties.getConnectionPool().getMaxIdleConnections()))
+                    .setHttpClientConfigCallback(httpClientBuilder -> {
+                        httpClientBuilder
+                                .setMaxConnTotal(properties.getConnectionPool().getMaxConnections())
+                                .setMaxConnPerRoute(properties.getConnectionPool().getMaxIdleConnections());
+                        // 如果配置了用户名和密码，添加认证
+                        if (!properties.getUsername().isEmpty() && properties.getPassword() != null) {
+                            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                            credentialsProvider.setCredentials(
+                                    AuthScope.ANY,
+                                    new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword())
+                            );
+                            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                        }
+
+                        return httpClientBuilder;
+                    })
                 .build();
         } catch (Exception e) {
             throw new RuntimeException("创建RestClient失败", e);
