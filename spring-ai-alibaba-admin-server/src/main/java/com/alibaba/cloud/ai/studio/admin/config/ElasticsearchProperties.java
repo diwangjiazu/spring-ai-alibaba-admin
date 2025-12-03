@@ -13,6 +13,16 @@ public class ElasticsearchProperties {
     private String url = "http://localhost:9200";
 
     /**
+     * 用户名（可选）
+     */
+    private String username;
+
+    /**
+     * 密码（可选）
+     */
+    private String password;
+
+    /**
      * 连接超时时间（毫秒）
      */
     private Integer connectTimeout = 5000;
