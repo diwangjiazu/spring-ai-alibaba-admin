@@ -104,6 +104,12 @@
             <version>${spring-initializr.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.spring.initializr</groupId>
+            <artifactId>initializr-metadata</artifactId>
+            <version>${spring-initializr.version}</version>
+        </dependency>
+
         <!-- org.eclipse.jdt.core for format -->
         <dependency>
             <groupId>org.eclipse.jdt</groupId>

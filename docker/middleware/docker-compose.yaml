@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  
+
   mysql:
     container_name: mysql
     restart: always
@@ -190,7 +190,7 @@ services:
       - "18081:18081"
     command: sh mqproxy -pc /home/rocketmq/conf/rmq-proxy.json
   init-topic:
-    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/rocketmq:5.3.2
+    image: apache/rocketmq:5.3.2
     container_name: rmq-init-topic
     restart: "no"
     depends_on:
