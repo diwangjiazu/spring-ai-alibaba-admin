@@ -18,7 +18,7 @@ export default defineConfig({
   routes: [
     {
       path: '/',
-      redirect: '/home',
+      redirect: '/app',
     },
     {
       path: '/admin',
@@ -147,6 +147,10 @@ export default defineConfig({
     {
       path: '/knowledge/sliceEditing/:kb_id/:doc_id',
       component: 'Knowledge/Detail/SliceEditing/index',
+    },
+    {
+      path: '/setting',
+      redirect: '/setting/modelService',
     },
     {
       path: '/setting/modelService',
