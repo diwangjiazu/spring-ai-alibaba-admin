@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation, useNavigate } from 'umi';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout as AntLayout, Menu } from 'antd';
 import {
   AppstoreOutlined,
@@ -26,8 +26,8 @@ import SettingDropdown from './SettingDropdown';
 import ThemeSelect from './ThemeSelect';
 import UserAccountModal from '@/components/UserAccountModal';
 import PureLayout from './Pure';
-import { ModelsContext } from '@/legacy/context/models';
-import PromptAPI from '@/legacy/services';
+import { ModelsContext } from '@/pages/admin/context/models';
+import PromptAPI from '@/pages/admin/services';
 
 const { Sider, Content } = AntLayout;
 
@@ -117,9 +117,9 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
   const [models, setModels] = useState<any[]>([]);
   const [modelNameMap, setModelNameMap] = useState<Record<number, string>>({});
 
-  // 加载模型列表（用于 legacy 页面）
+  // 加载模型列表（用于 admin 页面）
   useEffect(() => {
-    PromptAPI.getModels()
+    PromptAPI.getModels({})
       .then((res) => {
         const nameMap = res.data.pageItems.reduce((acc: Record<number, string>, item: any) => {
           acc[item.id] = item.name;
@@ -245,8 +245,8 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
     navigate(key);
   };
 
-  // 判断是否应该隐藏侧边栏（登录页、首页等）
-  const shouldHideSidebar = ['/login', '/', '/home'].includes(location.pathname);
+  // 判断是否应该隐藏侧边栏（登录页等）
+  const shouldHideSidebar = ['/login'].includes(location.pathname);
 
   if (shouldHideSidebar) {
     return (

@@ -4,7 +4,7 @@ module.exports = {
     './src/pages/**/*.tsx',
     './src/components/**/*.tsx',
     './src/layouts/**/*.tsx',
-    './src/legacy/**/*.{js,jsx,ts,tsx}',
+    './src/pages/admin/**/*.{js,jsx,ts,tsx}',
     '../spark-flow/src/**/*.{js,jsx,ts,tsx}',
   ],
 };
