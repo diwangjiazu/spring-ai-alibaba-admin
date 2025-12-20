@@ -88,27 +88,6 @@ const ApplicationBuild = () => {
       disabled: true,
       onClick: () => handleDisabledClick('Graph 可视化调试'),
     },
-    {
-      title: 'Tracing',
-      description: '全链路追踪智能体执行过程，提供详细的调用链路分析和性能监控',
-      icon: <LineChartOutlined />,
-      disabled: true,
-      onClick: () => handleDisabledClick('Tracing'),
-    },
-    {
-      title: 'Evaluation',
-      description: '智能体效果评估和测试框架，支持多维度评估指标和自动化测试',
-      icon: <BarChartOutlined />,
-      disabled: true,
-      onClick: () => handleDisabledClick('Evaluation'),
-    },
-    {
-      title: 'Prompt Engineering',
-      description: '提示词工程和优化工具，支持提示词模板管理、测试和效果分析',
-      icon: <BulbOutlined />,
-      disabled: true,
-      onClick: () => handleDisabledClick('Prompt Engineering'),
-    },
   ];
 
   // 智能体管理栏目

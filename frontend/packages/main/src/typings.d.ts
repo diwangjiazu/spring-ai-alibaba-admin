@@ -18,4 +18,9 @@ declare module '*.module.less' {
   export default classes;
 }
 
+declare module '*.svg' {
+  const content: string;
+  export default content;
+}
+
 import 'umi/typings';
