@@ -11,46 +11,50 @@ import {
   NodeIndexOutlined,
   SettingOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  AppstoreOutlined,
+  BuildOutlined
 } from '@ant-design/icons';
 
 const { Sider, Content } = AntLayout;
 
 // 获取应该高亮的菜单项 key
 const getSelectedMenuKey = (pathname) => {
-  // 移除 /admin 前缀进行匹配
-  const path = pathname.replace(/^\/admin/, '') || '/';
+  // 应用构建相关页面
+  if (pathname.startsWith('/application-build') || pathname.startsWith('/build') || pathname === '/') {
+    return '/build';
+  }
   
   // 评测集相关页面
-  if (path.startsWith('/evaluation/gather')) {
-    return '/admin/evaluation/gather';
+  if (pathname.startsWith('/evaluation-gather')) {
+    return '/evaluation-gather';
   }
   
   // 评估器相关页面
-  if (path.startsWith('/evaluation/evaluator') || path === '/evaluation/debug') {
-    return '/admin/evaluation/evaluator';
+  if (pathname.startsWith('/evaluation-evaluator') || pathname === '/evaluation-debug') {
+    return '/evaluation-evaluator';
   }
   
   // 实验相关页面
-  if (path.startsWith('/evaluation/experiment')) {
-    return '/admin/evaluation/experiment';
+  if (pathname.startsWith('/evaluation-experiment')) {
+    return '/evaluation-experiment';
   }
   
   // Prompt 相关页面
-  if (path.startsWith('/prompt') || path === '/prompts' || path === '/playground' || path === '/version-history') {
+  if (pathname.startsWith('/prompt') || pathname === '/prompts' || pathname === '/playground' || pathname === '/version-history') {
     // 根据具体路径返回对应的菜单项
-    if (path === '/playground') {
-      return '/admin/playground';
+    if (pathname === '/playground') {
+      return '/playground';
     }
-    if (path === '/version-history') {
-      return '/admin/prompts'; // 版本历史页面归属于 Prompts 菜单
+    if (pathname === '/version-history') {
+      return '/prompts'; // 版本历史页面归属于 Prompts 菜单
     }
-    return '/admin/prompts'; // 默认返回 Prompts 菜单
+    return '/prompts'; // 默认返回 Prompts 菜单
   }
   
   // Tracing 页面
-  if (path.startsWith('/tracing')) {
-    return '/admin/tracing';
+  if (pathname.startsWith('/tracing')) {
+    return '/tracing';
   }
   
   // 默认情况，直接返回当前路径
@@ -67,17 +71,29 @@ const Layout = ({ children }) => {
 
   const menuItems = [
     {
+      key: 'application',
+      label: '应用管理',
+      icon: <AppstoreOutlined />,
+      children: [
+        {
+          key: '/build',
+          label: '应用构建',
+          icon: <BuildOutlined />
+        }
+      ]
+    },
+    {
       key: 'prompt',
       label: 'Prompt工程',
       icon: <BulbOutlined />,
       children: [
         {
-          key: '/admin/prompts',
+          key: '/prompts',
           label: 'Prompts',
           icon: <UnorderedListOutlined />
         },
         {
-          key: '/admin/playground',
+          key: '/playground',
           label: 'Playground',
           icon: <PlayCircleOutlined />
         }
@@ -89,17 +105,17 @@ const Layout = ({ children }) => {
       icon: <ExperimentOutlined />,
       children: [
         {
-          key: '/admin/evaluation/gather',
+          key: '/evaluation-gather',
           label: '评测集',
           icon: <UnorderedListOutlined />
         },
         {
-          key: '/admin/evaluation/evaluator',
+          key: '/evaluation-evaluator',
           label: '评估器',
           icon: <BarChartOutlined />
         },
         {
-          key: '/admin/evaluation/experiment',
+          key: '/evaluation-experiment',
           label: '实验',
           icon: <ExperimentOutlined />
         }
@@ -111,7 +127,7 @@ const Layout = ({ children }) => {
       icon: <LineChartOutlined />,
       children: [
         {
-          key: '/admin/tracing',
+          key: '/tracing',
           label: 'Tracing',
           icon: <NodeIndexOutlined />
         }
@@ -142,7 +158,7 @@ const Layout = ({ children }) => {
         <Menu
           mode="inline"
           selectedKeys={[selectedKey]}
-          defaultOpenKeys={collapsed ? [] : ['prompt', 'evaluation', 'observability']}
+          defaultOpenKeys={collapsed ? [] : ['prompt', 'evaluation', 'observability', 'application']}
           items={menuItems}
           onClick={handleMenuClick}
           className="border-r-0 mt-6"
