@@ -23,13 +23,14 @@ import {
 } from '@spark-ai/design';
 import { Spin, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'umi';
+import { useNavigate, useParams } from 'umi';
 import styles from './Detail.module.less';
 import ModelConfigModal from './components/ModelConfigModal';
 import ProviderInfoForm from './components/ProviderInfoForm';
 
 const ModelServiceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [isModelConfigModalVisible, setIsModelConfigModalVisible] =
     useState<boolean>(false);
   const [currentModel, setCurrentModel] = useState<IModel | undefined>(
@@ -235,6 +236,16 @@ const ModelServiceDetail: React.FC = () => {
       return;
     }
 
+    if (!modelInfo.model_id) {
+      message.error(
+        $i18n.get({
+          id: 'main.pages.Setting.ModelService.Detail.modelIdNotExist',
+          dm: '模型ID不存在',
+        }),
+      );
+      return;
+    }
+
     const updateParams: ICreateModelParams = {
       ...modelInfo,
       name: modelInfo.name,
@@ -355,6 +366,16 @@ const ModelServiceDetail: React.FC = () => {
         },
       ]}
       loading={modelLoading}
+      bottom={
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+          <Button onClick={() => navigate('/setting/modelService')}>
+            {$i18n.get({
+              id: 'main.pages.Setting.ModelService.Detail.cancel',
+              dm: '取消',
+            })}
+          </Button>
+        </div>
+      }
     >
       <div className={styles.container}>
         <div className={styles.info}>

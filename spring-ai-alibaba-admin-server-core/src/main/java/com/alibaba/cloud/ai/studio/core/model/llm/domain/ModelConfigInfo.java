@@ -15,6 +15,7 @@
  */
 package com.alibaba.cloud.ai.studio.core.model.llm.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -30,6 +31,7 @@ public class ModelConfigInfo implements Serializable {
 	private String icon;
 
 	/** Unique identifier for the model */
+	@JsonProperty("model_id")
 	private String modelId;
 
 	/** Model provider */

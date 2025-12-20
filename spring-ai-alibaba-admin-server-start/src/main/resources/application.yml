@@ -4,7 +4,7 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript
     min-response-size: 2048
 nacos:
-  server-addr: 127.0.0.1:8848
+  server-addr: 47.239.212.78:8848
 
 management:
   tracing:
@@ -14,7 +14,7 @@ management:
     tracing:
       export:
         enabled: true
-      endpoint: http://localhost:4318/v1/traces
+      endpoint: http://47.239.212.78:4318/v1/traces
     metrics:
       export:
         enabled: false
@@ -69,7 +69,7 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/admin?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://47.239.212.78:3306/admin?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: admin
     password: admin
     druid:
@@ -89,7 +89,7 @@ spring:
 
   data:
     redis:
-      host: 127.0.0.1
+      host: 47.239.212.78
       port: 6379
       database: 0
   freemarker:
@@ -100,7 +100,7 @@ spring:
     content-type: text/html
     template-loader-path: classpath:/templates/
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://47.239.212.78:9200
     connection-timeout: 10000
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -113,7 +113,7 @@ spring:
       jakarta:
         persistence:
           jdbc:
-            url: jdbc:mysql://127.0.0.1:3306/admin?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+            url: jdbc:mysql://47.239.212.78:3306/admin?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
             user: admin
             password: admin
             driver: com.mysql.cj.jdbc.Driver
@@ -125,7 +125,7 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 rocketmq:
-  endpoints: 127.0.0.1:18080
+  endpoints: 47.239.212.78:18080
   document-index-topic: topic_saa_studio_document_index
   document_index_group: group_saa_studio_document_index
 

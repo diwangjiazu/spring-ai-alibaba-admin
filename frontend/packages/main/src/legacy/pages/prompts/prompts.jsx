@@ -127,7 +127,7 @@ const PromptsPage = () => {
   };
 
   const handleView = (prompt) => {
-    localStorage.clear("prompt-sessions");
+    localStorage.removeItem("prompt-sessions");
     navigate(buildLegacyPath('/prompt-detail', { promptKey: prompt.promptKey }));
   };
 

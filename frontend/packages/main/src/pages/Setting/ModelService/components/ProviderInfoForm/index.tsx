@@ -5,6 +5,7 @@ import { updateProvider } from '@/services/modelService';
 import type { IProviderConfigInfo } from '@/types/modelService';
 import { AlertDialog, Button, Form, Input, message } from '@spark-ai/design';
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProviderAvatar } from '../ProviderAvatar';
 import styles from './index.module.less';
 interface ProviderInfoFormProps {
@@ -72,6 +73,7 @@ const ProviderInfoForm: React.FC<ProviderInfoFormProps> = ({
   onRefresh,
 }) => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
   const isPreset = provider?.source === 'preset';
 
   useEffect(() => {
@@ -263,7 +265,10 @@ const ProviderInfoForm: React.FC<ProviderInfoFormProps> = ({
                   dm: '保存',
                 })}
               </Button>
-              <Button htmlType="button" onClick={initForm}>
+              <Button
+                htmlType="button"
+                onClick={() => navigate('/setting/modelService')}
+              >
                 {$i18n.get({
                   id: 'main.pages.Setting.ModelService.components.ProviderInfoForm.index.cancel',
                   dm: '取消',
