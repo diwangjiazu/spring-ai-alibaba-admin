@@ -3,7 +3,7 @@
 .app-build-container {
   padding: 24px;
   min-height: calc(100vh - 200px);
-  background-color: #f5f5f5;
+  background-color: var(--ag-ant-color-bg-layout, #f5f5f5);
 }
 
 .app-build-header {
@@ -14,12 +14,12 @@
 .app-build-title {
   font-size: 28px;
   font-weight: 600;
-  color: #262626;
+  color: var(--ag-ant-color-text-base, #262626);
   margin: 0 0 8px 0;
 }
 
 .app-build-subtitle {
-  color: #5b6b7f;
+  color: var(--ag-ant-color-text-secondary, #5b6b7f);
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
@@ -36,7 +36,7 @@
 .section-title {
   font-size: 20px;
   font-weight: 600;
-  color: #262626;
+  color: var(--ag-ant-color-text-base, #262626);
   margin: 0 0 20px 0;
   text-align: left;
   position: relative;
@@ -87,13 +87,13 @@
 }
 
 .feature-card {
-  background: #ffffff;
+  background: var(--ag-ant-color-bg-base, #ffffff);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 0;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid transparent;
+  border: 1px solid var(--ag-ant-color-border-secondary, transparent);
   min-height: 180px;
   display: flex;
   flex-direction: column;
@@ -102,7 +102,7 @@
 .feature-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #667eea;
+  border-color: var(--ag-ant-color-primary, #667eea);
 }
 
 .feature-card-disabled {
@@ -115,7 +115,7 @@
   transform: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   opacity: 0.5;
-  border-color: transparent;
+  border-color: var(--ag-ant-color-border-secondary, transparent);
 }
 
 .feature-card-content {
@@ -154,14 +154,14 @@
 .feature-title {
   font-size: 16px;
   font-weight: 600;
-  color: #262626;
+  color: var(--ag-ant-color-text-base, #262626);
   margin: 0 0 12px 0;
   line-height: 1.4;
 }
 
 .feature-description {
   font-size: 14px;
-  color: #8c8c8c;
+  color: var(--ag-ant-color-text-secondary, #8c8c8c);
   line-height: 1.6;
   margin: 0;
   flex: 1;

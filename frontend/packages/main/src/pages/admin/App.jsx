@@ -45,7 +45,7 @@ function App() {
           modelNameMap,
           setModels
         }}>
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen" style={{ backgroundColor: 'var(--ag-ant-color-bg-layout, #f5f5f5)' }}>
             <Layout>
               <Routes>
                 <Route path="/" element={<ApplicationBuild />} />
