@@ -44,6 +44,10 @@ public class AgentResponse implements Serializable {
 	@JsonProperty("request_id")
 	private String requestId;
 
+	/** Unique identifier for the trace */
+	@JsonProperty("trace_id")
+	private String traceId;
+
 	/** Unique identifier for the conversation */
 	@JsonProperty("conversation_id")
 	private String conversationId;

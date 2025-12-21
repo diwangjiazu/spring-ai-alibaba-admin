@@ -15,7 +15,8 @@
  */
 package com.alibaba.cloud.ai.studio.admin.tracing;
 
-import com.alibaba.cloud.ai.common.R;
+import com.alibaba.cloud.ai.studio.runtime.domain.Result;
+
 import io.micrometer.tracing.Tracer;
 import java.util.Objects;
 import org.springframework.core.MethodParameter;
@@ -36,7 +37,7 @@ public class GlobalResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class converterType) {
-		return returnType.getParameterType().equals(R.class);
+		return returnType.getParameterType().equals(Result.class);
 	}
 
 	@Override
@@ -44,8 +45,8 @@ public class GlobalResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 			Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 		if (tracer.currentSpan() != null) {
 			String traceId = Objects.requireNonNull(tracer.currentSpan()).context().traceId();
-			R newBody = (R) body;
-			newBody.setRequestId(traceId);
+			Result<?> newBody = (Result<?>) body;
+			newBody.setTraceId(traceId);
 			return body;
 		}
 		else {

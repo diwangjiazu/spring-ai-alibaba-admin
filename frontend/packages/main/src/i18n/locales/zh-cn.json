@@ -1148,6 +1148,7 @@
   "main.types.modelService.tool": "工具",
   "main.utils.base.copySuccess": "复制成功",
   "main.layouts.MenuList.application": "应用",
+  "main.layouts.SideMenu.dify": "Dify生成Graph代码",
   "main.components.AccountModal.index.accountManagement": "账号管理",
   "main.components.AccountModal.index.logout": "退出登录",
   "main.components.AccountModal.index.currentPassword": "当前密码",

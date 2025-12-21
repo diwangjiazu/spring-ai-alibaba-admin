@@ -1148,6 +1148,7 @@
   "main.types.modelService.tool": "ツール",
   "main.utils.base.copySuccess": "コピーに成功しました",
   "main.layouts.MenuList.application": "アプリケーション",
+  "main.layouts.SideMenu.dify": "Dify To Graph",
   "main.components.AccountModal.index.accountManagement": "アカウント管理",
   "main.components.AccountModal.index.logout": "ログアウト",
   "main.components.AccountModal.index.currentPassword": "現在のパスワード",

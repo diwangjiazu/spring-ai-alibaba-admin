@@ -27,7 +27,7 @@ export class Rpc {
       onerror,
       onclose,
     }: {
-      onopen: () => void;
+      onopen: (response: Response) => void;
       onmessage: (event: any) => void;
       onclose: () => void;
       onerror: (err: any) => void;

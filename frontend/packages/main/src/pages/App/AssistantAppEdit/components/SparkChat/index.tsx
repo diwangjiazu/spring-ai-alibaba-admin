@@ -30,6 +30,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useNavigate } from 'umi';
 import Steps from './components/Steps';
 import Welcome from './components/Welcome';
 import { convertAgentMsgToSparkChat } from './converter';
@@ -51,6 +52,7 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
   const sparkChatRef = useRef<ChatAnywhereRef>();
   const chatRef = useRef<Chat | null>(null);
   const hasFirstChatRef = useRef(false); // clear the welcome card when the first message is sent
+  const navigate = useNavigate();
 
   // if the bizVar is not complete, trigger the notification
   const [hasTriggeredNotification, setHasTriggeredNotification] =
@@ -220,13 +222,14 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
           };
         },
       );
-      currentQA.current.answer.cards?.push(
-        createFooterFromSparkChatMessage(
-          chatRef.current?.cacheMessage?.request_id,
-          currentQA.current.answer,
-          true,
-        ),
-      );
+        currentQA.current.answer.cards?.push(
+          createFooterFromSparkChatMessage(
+            chatRef.current?.cacheMessage?.request_id,
+            currentQA.current.answer,
+            true,
+            chatRef.current?.cacheMessage?.trace_id,
+          ),
+        );
       sparkChatRef.current?.updateMessage(currentQA.current.answer);
     }
     sparkChatRef.current?.setLoading(false); // set the chat container loading state to false
@@ -266,7 +269,9 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
     requestId: string,
     sparkChatMessage: TMessage,
     isLatestMsg = true,
+    traceId?: string,
   ) => {
+    console.log('[SparkChat] createFooterFromSparkChatMessage traceId:', traceId);
     return createCard('Footer', {
       left: (
         <DefaultCards.FooterActions
@@ -350,6 +355,26 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
                 );
               },
             },
+            traceId
+              ? {
+                  icon: (
+                    <Tooltip
+                      title={$i18n.get({
+                        id: 'main.pages.App.AssistantAppEdit.components.SparkChat.index.viewTracingHistory',
+                        dm: '查看对话追踪历史',
+                      })}
+                      trigger={'hover'}
+                    >
+                      <IconFont type="spark-search-line" size="small"></IconFont>
+                    </Tooltip>
+                  ),
+
+                  label: '',
+                  onClick: () => {
+                    navigate(`/admin/tracing?traceId=${traceId}`);
+                  },
+                }
+              : undefined,
           ].filter((item) => !!item)}
         />
       ),
@@ -460,13 +485,15 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
         );
         if (cacheMessage) {
           const converted = convertAgentMsgToSparkChat(cacheMessage);
-          currentQA.current.answer.cards?.push(
-            createFooterFromSparkChatMessage(
-              cacheMessage?.request_id,
-              converted,
-              true,
-            ),
-          );
+          console.log('[SparkChat] cacheMessage trace_id:', cacheMessage?.trace_id);
+        currentQA.current.answer.cards?.push(
+          createFooterFromSparkChatMessage(
+            cacheMessage?.request_id,
+            converted,
+            true,
+            cacheMessage?.trace_id,
+          ),
+        );
         }
         sparkChatRef.current?.updateMessage(currentQA.current.answer);
       }

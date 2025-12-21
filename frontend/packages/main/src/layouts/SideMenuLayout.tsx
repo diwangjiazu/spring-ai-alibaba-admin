@@ -16,6 +16,7 @@ import {
   ApiOutlined,
   DatabaseOutlined,
   ToolOutlined,
+  SwapOutlined,
 } from '@ant-design/icons';
 import $i18n from '@/i18n';
 import Header from './Header';
@@ -143,7 +144,7 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
         key: 'studio',
         label: $i18n.get({
           id: 'main.layouts.SideMenu.studio',
-          dm: 'Studio',
+          dm: ' Agent Builder',
         }),
         icon: <AppstoreOutlined />,
         children: [
@@ -175,6 +176,14 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
               dm: '知识库',
             }),
             icon: <DatabaseOutlined />,
+          },
+          {
+            key: '/dify',
+            label: $i18n.get({
+              id: 'main.layouts.SideMenu.dify',
+              dm: 'Dify To Graph',
+            }),
+            icon: <SwapOutlined />,
           },
         ],
       },
@@ -297,7 +306,7 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
               <Menu
                 mode="inline"
                 selectedKeys={[selectedKey]}
-                defaultOpenKeys={collapsed ? [] : ['studio', 'prompt', 'evaluation', 'observability']}
+                defaultOpenKeys={collapsed ? [] : ['studio']}
                 items={menuItems}
                 onClick={handleMenuClick}
                 className="border-r-0 mt-6"

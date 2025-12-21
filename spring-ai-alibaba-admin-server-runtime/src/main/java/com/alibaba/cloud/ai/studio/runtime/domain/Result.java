@@ -43,6 +43,9 @@ public class Result<T> implements Serializable {
 	@JsonProperty("request_id")
 	private String requestId;
 
+	@JsonProperty("trace_id")
+	private String traceId;
+
 	/** The actual response data */
 	private T data;
 
@@ -51,7 +54,7 @@ public class Result<T> implements Serializable {
 	private boolean success = true;
 
 	/** Error code if the request failed */
-	private String code;
+	private Integer code;
 
 	/** Error message if the request failed */
 	private String message;
@@ -72,7 +75,13 @@ public class Result<T> implements Serializable {
 	 * @return Result instance
 	 */
 	public static <T> Result<T> success(String requestId, T data) {
-		return Result.<T>builder().success(true).requestId(requestId).data(data).build();
+		return Result.<T>builder()
+			.success(true)
+			.requestId(requestId)
+			.code(200)
+			.message("success")
+			.data(data)
+			.build();
 	}
 
 	/**
@@ -94,7 +103,7 @@ public class Result<T> implements Serializable {
 		return Result.<T>builder()
 			.requestId(requestId)
 			.success(false)
-			.code(errorCode.getCode())
+			.code(errorCode.getStatusCode())
 			.message(errorCode.toError().getMessage())
 			.build();
 	}
@@ -109,8 +118,43 @@ public class Result<T> implements Serializable {
 		return Result.<T>builder()
 			.requestId(requestId)
 			.success(false)
-			.code(error.getCode())
+			.code(error.getStatusCode())
 			.message(error.getMessage())
+			.build();
+	}
+
+	/**
+	 * Creates a successful result without data
+	 * @return Result instance
+	 */
+	public static <T> Result<T> success() {
+		return Result.<T>builder()
+			.success(true)
+			.code(200)
+			.message("success")
+			.build();
+	}
+
+	/**
+	 * Creates an error result with error message
+	 * @param message The error message
+	 * @return Result instance
+	 */
+	public static <T> Result<T> error(String message) {
+		return error(500, message);
+	}
+
+	/**
+	 * Creates an error result with error code and message
+	 * @param code The error code
+	 * @param message The error message
+	 * @return Result instance
+	 */
+	public static <T> Result<T> error(Integer code, String message) {
+		return Result.<T>builder()
+			.success(false)
+			.code(code)
+			.message(message)
 			.build();
 	}
 
