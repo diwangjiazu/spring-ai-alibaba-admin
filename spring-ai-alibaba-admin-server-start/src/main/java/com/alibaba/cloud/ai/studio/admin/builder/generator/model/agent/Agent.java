@@ -34,9 +34,11 @@ public class Agent {
 
 	private String outputKey;
 
+	@Deprecated
 	private String inputKey;
 
 	// 支持多输入键（与 schema: input_keys 对齐）
+	@Deprecated
 	private List<String> inputKeys;
 
 	// LLM相关配置

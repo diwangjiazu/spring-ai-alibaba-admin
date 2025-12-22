@@ -84,4 +84,5 @@ export interface IReceiveMessage {
   usage?: IUsage;
   error?: IError;
   request_id: string;
+  trace_id?: string; // Trace ID for observability
 }

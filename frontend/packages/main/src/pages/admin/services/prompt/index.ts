@@ -122,7 +122,29 @@ export async function getPromptTemplate(params: { promptTemplateKey: string }) {
 // 获取模型配置列表
 // 获取模型列表，已替换废弃的 getModelList 接口
 // 返回分页数据格式，支持搜索和过滤功能
-export async function getModels(params: PromptAPI.GetModelsParams) {
+export async function getModels(params?: PromptAPI.GetModelsParams) {
+  // Use new ModelService API for enabled models
+  const { getEnabledModels } = await import('@/services/modelService');
+  try {
+    const response = await getEnabledModels();
+    if (response?.data) {
+      // Convert to legacy format
+      return {
+        code: 200,
+        data: {
+          totalCount: response.data.length,
+          totalPage: 1,
+          pageNumber: 1,
+          pageSize: response.data.length,
+          pageItems: response.data,
+        },
+      } as PromptAPI.GetModelsResult;
+    }
+  } catch (error) {
+    console.error('Failed to get enabled models from ModelService, falling back to legacy API:', error);
+  }
+  
+  // Fallback to legacy API
   return request<PromptAPI.GetModelsResult>(`${API_PATH}/models`, {
     method: 'GET',
     params,

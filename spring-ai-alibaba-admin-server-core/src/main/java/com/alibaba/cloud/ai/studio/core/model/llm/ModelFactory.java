@@ -29,12 +29,16 @@ import com.alibaba.cloud.ai.studio.core.model.reranker.dashscope.DashScopeRerank
 import com.alibaba.cloud.ai.studio.core.model.reranker.dashscope.DashscopeReranker;
 import com.alibaba.cloud.ai.studio.core.utils.ErrorHandlerUtils;
 import com.alibaba.cloud.ai.studio.core.utils.api.ApiUtils;
+
+import io.micrometer.observation.ObservationRegistry;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.observation.ChatModelObservationConvention;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
@@ -64,6 +68,12 @@ public class ModelFactory {
 	@Resource
 	private ProviderManager providerManager;
 
+	@Resource
+	private ObservationRegistry observationRegistry;
+
+	@Resource
+	private ChatModelObservationConvention customChatModelObservationConvention;
+
 	/**
 	 * Creates and returns a chat model instance for the specified provider
 	 * @param provider The provider name
@@ -75,7 +85,12 @@ public class ModelFactory {
 		// API
 
 		OpenAiApi openAiApi = buildOpenAiApi(credential);
-		return OpenAiChatModel.builder().openAiApi(openAiApi).build();
+		OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
+				.openAiApi(openAiApi)
+				.observationRegistry(observationRegistry)
+				.build();
+		openAiChatModel.setObservationConvention(customChatModelObservationConvention);
+		return openAiChatModel;
 	}
 
 	/**

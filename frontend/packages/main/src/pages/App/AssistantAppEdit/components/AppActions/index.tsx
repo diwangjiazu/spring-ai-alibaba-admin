@@ -15,7 +15,7 @@ export default function AppActions(props: {
   updateAppDetailWithInfos: (data: any) => void;
 }) {
   const { activeKey } = props;
-  const { appState, setAppState, appCode, refreshAppDetail } =
+  const { appState, setAppState, appCode, refreshAppDetail, handleExportSAA } =
     useContext(AssistantAppContext);
   const [state, setState] = useSetState({
     visible: false,
@@ -166,14 +166,21 @@ export default function AppActions(props: {
             </Button>
           </Tooltip>
           {appState.selectedVersion === 'draft' ? (
-            <Popover
-              onOpenChange={(val) => {
-                if (!val) onClose();
-              }}
-              overlayClassName={styles.confirmWrap}
-              trigger={['click']}
-              open={state.visible}
-              content={
+            <>
+              <Button
+                disabled={appState.saveLoading}
+                onClick={handleExportSAA}
+              >
+                导出SAA工程代码
+              </Button>
+              <Popover
+                onOpenChange={(val) => {
+                  if (!val) onClose();
+                }}
+                overlayClassName={styles.confirmWrap}
+                trigger={['click']}
+                open={state.visible}
+                content={
                 <div className={styles.info}>
                   <IconFont
                     className={styles.warnIcon}
@@ -229,6 +236,7 @@ export default function AppActions(props: {
                 })}
               </Button>
             </Popover>
+            </>
           ) : (
             <Button
               icon={<IconFont type="spark-processOutput-line" />}

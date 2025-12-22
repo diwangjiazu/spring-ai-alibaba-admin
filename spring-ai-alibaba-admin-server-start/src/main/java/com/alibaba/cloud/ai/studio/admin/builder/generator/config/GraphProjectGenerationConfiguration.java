@@ -26,10 +26,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnRequestedDependency(GraphProjectGenerationConfiguration.GRAPH_PROJECT_DEPENDENCY)
+//@ConditionalOnRequestedDependency(GraphProjectGenerationConfiguration.GRAPH_PROJECT_DEPENDENCY)
 public class GraphProjectGenerationConfiguration {
 
-	public static final String GRAPH_PROJECT_DEPENDENCY = "spring-ai-alibaba-graph";
+	public static final String GRAPH_PROJECT_DEPENDENCY = "spring-ai-alibaba-graph-core";
 
 	private final GraphProjectDescription description;
 

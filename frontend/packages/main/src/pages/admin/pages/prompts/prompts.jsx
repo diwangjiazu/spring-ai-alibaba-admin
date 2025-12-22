@@ -127,7 +127,7 @@ const PromptsPage = () => {
   };
 
   const handleView = (prompt) => {
-    localStorage.clear("prompt-sessions");
+    localStorage.removeItem("prompt-sessions");
     navigate(buildLegacyPath('/prompt-detail', { promptKey: prompt.promptKey }));
   };
 
@@ -273,7 +273,7 @@ const PromptsPage = () => {
               icon={<ShareAltOutlined />}
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/tracing`, {
+                navigate(buildLegacyPath("/tracing"), {
                   state: {
                     adv: {
                       "spring.ai.alibaba.prompt.key":record.promptKey

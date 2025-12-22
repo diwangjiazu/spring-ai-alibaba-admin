@@ -2,6 +2,7 @@ package com.alibaba.cloud.ai.studio.admin.service.client;
 
 import com.alibaba.cloud.ai.studio.admin.entity.ModelConfigDO;
 import com.alibaba.cloud.ai.studio.admin.repository.ModelConfigRepository;
+import com.alibaba.cloud.ai.studio.admin.service.ModelConfigBridgeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,8 @@ public class ChatClientFactoryDelegate {
     
     private final ModelConfigRepository modelConfigRepository;
     
+    private final ModelConfigBridgeService modelConfigBridgeService;
+    
     private final ObjectMapper objectMapper;
     
     private final Map<String, ChatClientFactory> chatClientFactories;
@@ -31,13 +34,16 @@ public class ChatClientFactoryDelegate {
 
     private final ChatClientObservationConvention customObservationConvention;
     
-    public ChatClientFactoryDelegate(ModelConfigRepository modelConfigRepository, ObjectMapper objectMapper,
+    public ChatClientFactoryDelegate(ModelConfigRepository modelConfigRepository, 
+            ModelConfigBridgeService modelConfigBridgeService,
+            ObjectMapper objectMapper,
             ObservationRegistry observationRegistry,
             ChatClientObservationConvention customObservationConvention,
             OpenAiChatClientFactory openAiChatClientFactory,
             DashScopeChatClientFactory dashScopeChatClientFactory,
             DeepSeekChatClientFactory deepSeekChatClientFactory) {
         this.modelConfigRepository = modelConfigRepository;
+        this.modelConfigBridgeService = modelConfigBridgeService;
         this.objectMapper = objectMapper;
         this.chatClientFactories = new HashMap<>();
         this.observationRegistry = observationRegistry;
@@ -65,10 +71,19 @@ public class ChatClientFactoryDelegate {
     }
     
     public ChatClient createChatClient(Long modelConfigId, Map<String, Object> userParameters, List<Advisor> advisors, Map<String, String> observationMetadata) {
-        ModelConfigDO config = modelConfigRepository.findById(modelConfigId);
+        // 优先从桥接服务查找（从Manager层查询）
+        ModelConfigDO config = modelConfigBridgeService.findById(modelConfigId);
+        
+        // 如果桥接服务中找不到，尝试从ModelConfigRepository查找（保持向后兼容）
+        if (config == null) {
+            log.debug("桥接服务中未找到模型配置 id={}，尝试从 ModelConfigRepository 查找", modelConfigId);
+            config = modelConfigRepository.findById(modelConfigId);
+        }
+        
         if (config == null) {
             throw new RuntimeException("模型配置不存在: " + modelConfigId);
         }
+        
         if (config.getStatus() != 1) {
             throw new RuntimeException("模型配置已禁用: " + modelConfigId);
         }
@@ -78,7 +93,12 @@ public class ChatClientFactoryDelegate {
         
         ChatClientFactory factory = chatClientFactories.get(provider);
         if (factory == null) {
-            throw new UnsupportedOperationException("不支持的模型提供商: " + config.getProvider());
+            // 如果找不到对应的 provider factory，默认使用 OpenAI
+            log.warn("未找到提供商 {} 对应的工厂，使用默认的 OpenAI 工厂", provider);
+            factory = chatClientFactories.get(OpenAiChatClientFactory.OPEN_AI_PROVIDER);
+            if (factory == null) {
+                throw new UnsupportedOperationException("不支持的模型提供商: " + config.getProvider() + "，且默认的 OpenAI 工厂也不可用");
+            }
         }
         
         ChatModel chatModel = factory.buildChatModel(config);
@@ -92,7 +112,6 @@ public class ChatClientFactoryDelegate {
                     .build();
         }
     }
-    
     
     /**
      * 合并默认参数和用户参数

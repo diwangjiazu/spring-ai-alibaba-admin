@@ -21,7 +21,7 @@ import java.util.Map;
 @Component
 public class OpenAiChatClientFactory implements ChatClientFactory {
     
-    private static final String OPEN_AI_PROVIDER = "openai";
+    public static final String OPEN_AI_PROVIDER = "openai";
     
     private final ObservationRegistry observationRegistry;
     

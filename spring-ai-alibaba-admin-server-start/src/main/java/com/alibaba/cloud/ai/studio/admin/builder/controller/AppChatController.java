@@ -26,6 +26,7 @@ import com.alibaba.cloud.ai.studio.runtime.utils.JsonUtils;
 import com.alibaba.cloud.ai.studio.core.base.service.AgentService;
 import com.alibaba.cloud.ai.studio.core.context.RequestContextHolder;
 import com.alibaba.cloud.ai.studio.core.utils.LogUtils;
+import io.micrometer.tracing.Tracer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
+
+import java.util.Objects;
 
 import static com.alibaba.cloud.ai.studio.core.utils.LogUtils.FAIL;
 import static com.alibaba.cloud.ai.studio.core.utils.LogUtils.SUCCESS;
@@ -56,8 +59,12 @@ public class AppChatController {
 	/** Service for handling agent-related operations */
 	private final AgentService agentService;
 
-	public AppChatController(AgentService agentService) {
+	/** Tracer for distributed tracing */
+	private final Tracer tracer;
+
+	public AppChatController(AgentService agentService, Tracer tracer) {
 		this.agentService = agentService;
+		this.tracer = tracer;
 	}
 
 	/**
@@ -78,6 +85,20 @@ public class AppChatController {
 		LogUtils.trace(context, "startCall", LogUtils.SUCCESS, start, request, null);
 		request.setDraft(true);
 		if (request.getStream() != null && request.getStream()) {
+			// Get traceId early before async processing
+			String traceId = null;
+			if (tracer.currentSpan() != null) {
+				traceId = Objects.requireNonNull(tracer.currentSpan()).context().traceId();
+			}
+			final String finalTraceId = traceId;
+			
+			// Set traceId in response header
+			if (finalTraceId != null) {
+				response.addHeader("X-Request-ID", finalTraceId);
+				LogUtils.monitor(context, "AgentChatController", "traceIdSet", context.getStartTime(), SUCCESS, 
+					"traceId: " + finalTraceId, null);
+			}
+
 			Flux<AgentResponse> responseFlux = agentService.streamCall(Flux.just(request));
 
 			// in case nginx will buffer the response, we need to disable it
@@ -85,8 +106,8 @@ public class AppChatController {
 			response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_EVENT_STREAM_VALUE);
 
 			SseEmitter emitter = new SseEmitter(0L);
-			responseFlux.doOnNext(data -> sendStreamingResponse(context, request, emitter, data, response))
-				.onErrorResume(err -> handleError(context, request, err))
+			responseFlux.doOnNext(data -> sendStreamingResponse(context, request, emitter, data, response, finalTraceId))
+				.onErrorResume(err -> handleError(context, request, err, finalTraceId))
 				.doFinally(type -> handleComplete(context, type, emitter))
 				.subscribe();
 
@@ -95,6 +116,13 @@ public class AppChatController {
 
 		try {
 			AgentResponse completion = agentService.call(request);
+			
+			// Add traceId to the response if available
+			if (completion.getTraceId() == null && tracer.currentSpan() != null) {
+				String traceId = Objects.requireNonNull(tracer.currentSpan()).context().traceId();
+				completion.setTraceId(traceId);
+			}
+			
 			String result = JsonUtils.toJson(completion);
 
 			LogUtils.monitor(context, "AgentChatController", "endCall", context.getStartTime(), LogUtils.SUCCESS,
@@ -118,9 +146,26 @@ public class AppChatController {
 	 * logs completion status.
 	 */
 	private void sendStreamingResponse(RequestContext context, AgentRequest request, SseEmitter emitter,
-			AgentResponse completion, HttpServletResponse response) {
+			AgentResponse completion, HttpServletResponse response, String traceId) {
 		if (completion.getError() != null) {
 			response.setStatus(completion.getError().getStatusCode());
+		}
+
+		// Add traceId to the response - use the captured traceId or try to get from tracer
+		if (completion.getTraceId() == null) {
+			if (traceId != null) {
+				completion.setTraceId(traceId);
+			}
+			else if (tracer.currentSpan() != null) {
+				String currentTraceId = Objects.requireNonNull(tracer.currentSpan()).context().traceId();
+				completion.setTraceId(currentTraceId);
+			}
+		}
+		
+		// Log traceId for debugging
+		if (completion.getTraceId() != null && completion.getStatus() == AgentStatus.COMPLETED) {
+			LogUtils.monitor(context, "AgentChatController", "traceIdInResponse", context.getStartTime(), SUCCESS,
+				"traceId: " + completion.getTraceId(), null);
 		}
 
 		String json = JsonUtils.toJson(completion);
@@ -142,12 +187,16 @@ public class AppChatController {
 	 * Handles errors during streaming by converting them to appropriate error responses.
 	 * Logs the error and returns a formatted error response.
 	 */
-	private Mono<AgentResponse> handleError(RequestContext context, AgentRequest request, Throwable err) {
+	private Mono<AgentResponse> handleError(RequestContext context, AgentRequest request, Throwable err, String traceId) {
 		LogUtils.monitor(context, "AgentChatController", "endStreamCallError", context.getStartTime(), FAIL, request,
 				err.getMessage(), err);
 
 		Error error = ExceptionUtils.convertError(err);
-		AgentResponse completion = AgentResponse.builder().requestId(context.getRequestId()).error(error).build();
+		AgentResponse completion = AgentResponse.builder()
+			.requestId(context.getRequestId())
+			.traceId(traceId)
+			.error(error)
+			.build();
 
 		return Mono.just(completion);
 	}

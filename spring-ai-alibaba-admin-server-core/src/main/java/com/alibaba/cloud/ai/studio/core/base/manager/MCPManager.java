@@ -243,9 +243,9 @@ public class MCPManager {
 					String url = (String) singleServerConfig.get("url");
 					try {
 						URL urlObj = new URL(url);
-						if (!urlObj.getPath().endsWith("/sse")) {
-							return Result.error(MCP_PARSE_URL_ERROR);
-						}
+//						if (!urlObj.getPath().endsWith("/sse")) {
+//							return Result.error(MCP_PARSE_URL_ERROR);
+//						}
 
 						String remoteAddress = urlObj.getProtocol() + "://" + urlObj.getHost();
 						if (urlObj.getPort() != -1) {

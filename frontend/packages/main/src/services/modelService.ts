@@ -237,3 +237,25 @@ export async function getModelParameterRules(
   });
   return response.data;
 }
+
+/**
+ * Get all enabled models for prompt usage
+ * Returns models in a format compatible with legacy prompt API
+ * @returns Promise containing list of enabled models
+ */
+export async function getEnabledModels(): Promise<IApiResponse<Array<{
+  id: number;
+  name: string;
+  provider: string;
+  modelName: string;
+  baseUrl: string;
+  defaultParameters: Record<string, any>;
+  supportedParameters: any[];
+  status: number;
+}>>> {
+  const response = await request({
+    url: '/console/v1/models/enabled',
+    method: 'GET',
+  });
+  return response.data;
+}

@@ -19,6 +19,7 @@ package com.alibaba.cloud.ai.studio.admin.builder.controller;
 import com.alibaba.cloud.ai.studio.runtime.exception.BizException;
 import com.alibaba.cloud.ai.studio.runtime.enums.ErrorCode;
 import com.alibaba.cloud.ai.studio.runtime.domain.Result;
+import com.alibaba.cloud.ai.studio.core.base.entity.ModelEntity;
 import com.alibaba.cloud.ai.studio.core.model.llm.domain.ModelConfigInfo;
 import com.alibaba.cloud.ai.studio.core.model.llm.domain.ProviderConfigInfo;
 import com.alibaba.cloud.ai.studio.core.base.manager.ModelManager;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -111,6 +113,44 @@ public class ModelController {
 		}
 		catch (Exception e) {
 			log.error("getModelSelector error", e);
+			return Result.error(IdGenerator.uuid(), ErrorCode.SYSTEM_ERROR);
+		}
+	}
+
+	/**
+	 * Get all enabled models for prompt usage
+	 * This API returns models in a format compatible with the legacy prompt API
+	 * @return Result containing a list of models with id field (Long) for prompt compatibility
+	 */
+	@GetMapping("/enabled")
+	public Result<List<Map<String, Object>>> getEnabledModels() {
+		try {
+			List<ModelEntity> modelEntities = modelManager.queryEnabledModelEntities();
+			if (CollectionUtils.isEmpty(modelEntities)) {
+				return Result.success(Lists.newArrayList());
+			}
+			
+			// Convert to format compatible with legacy prompt API
+			List<Map<String, Object>> models = modelEntities.stream().map(entity -> {
+				Map<String, Object> model = new HashMap<>();
+				model.put("id", entity.getId()); // Long id for prompt compatibility
+				model.put("name", entity.getName());
+				model.put("provider", entity.getProvider());
+				model.put("modelName", entity.getModelId()); // model_id as modelName for compatibility
+				model.put("baseUrl", ""); // Not available in ModelEntity
+				model.put("defaultParameters", new HashMap<>()); // Not available in ModelEntity
+				model.put("supportedParameters", Lists.newArrayList()); // Not available in ModelEntity
+				model.put("status", entity.getEnable() ? 1 : 0);
+				return model;
+			}).collect(Collectors.toList());
+			
+			return Result.success(models);
+		}
+		catch (BizException e) {
+			return Result.error(IdGenerator.uuid(), e.getError());
+		}
+		catch (Exception e) {
+			log.error("getEnabledModels error", e);
 			return Result.error(IdGenerator.uuid(), ErrorCode.SYSTEM_ERROR);
 		}
 	}

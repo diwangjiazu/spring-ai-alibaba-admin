@@ -22,5 +22,6 @@ export const AssistantAppContext = React.createContext<{
   getSaveData: () => IAssistantConfig | null;
   refreshAppDetail: () => Promise<void>;
   sparkChatComponentRef: React.MutableRefObject<ISparkChatRef | null>;
+  handleExportSAA: () => Promise<void>;
   // @ts-ignore
 }>({});

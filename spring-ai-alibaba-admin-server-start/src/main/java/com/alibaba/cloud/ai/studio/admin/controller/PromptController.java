@@ -1,7 +1,7 @@
 package com.alibaba.cloud.ai.studio.admin.controller;
 
 import com.alibaba.cloud.ai.studio.admin.common.PageResult;
-import com.alibaba.cloud.ai.studio.admin.common.Result;
+import com.alibaba.cloud.ai.studio.runtime.domain.Result;
 import com.alibaba.cloud.ai.studio.admin.dto.ChatSession;
 import com.alibaba.cloud.ai.studio.admin.dto.Prompt;
 import com.alibaba.cloud.ai.studio.admin.dto.PromptRunResponse;
@@ -60,7 +60,7 @@ public class PromptController {
      * 获取Prompt列表
      */
     @GetMapping("/prompts")
-    public Result<PageResult<Prompt>> listPrompts(@Validated PromptListRequest request) throws StudioException {
+    public Result<PageResult<Prompt>> listPrompts(@Validated @ModelAttribute PromptListRequest request) throws StudioException {
         log.info("查询Prompt列表请求: {}", request);
         PageResult<Prompt> result = promptService.list(request);
         return Result.success(result);
@@ -115,7 +115,7 @@ public class PromptController {
      * 获取Prompt版本列表
      */
     @GetMapping("/prompt/versions")
-    public Result<PageResult<PromptVersion>> listPromptVersions(@Validated PromptVersionListRequest request) {
+    public Result<PageResult<PromptVersion>> listPromptVersions(@Validated @ModelAttribute PromptVersionListRequest request) {
         log.info("查询Prompt版本列表请求: {}", request);
         PageResult<PromptVersion> result = promptVersionService.list(request);
         return Result.success(result);

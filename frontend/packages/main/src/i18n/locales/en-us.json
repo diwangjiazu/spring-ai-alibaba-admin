@@ -1148,6 +1148,7 @@
   "main.types.modelService.tool": "Tool Use",
   "main.utils.base.copySuccess": "Successful",
   "main.layouts.MenuList.application": "Application",
+  "main.layouts.SideMenu.dify": "Dify To Graph",
   "main.components.AccountModal.index.accountManagement": "Account",
   "main.components.AccountModal.index.logout": "Logout",
   "main.components.AccountModal.index.currentPassword": "Current Password",

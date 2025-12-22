@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  
+
   mysql:
     container_name: mysql
     restart: always
@@ -132,9 +132,12 @@ services:
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
   rmq_namesrv:
-    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/rocketmq:5.3.2
+    image: apache/rocketmq:5.3.2
     container_name: rmq_namesrv
+    user: "${UID}:${GID}"
     restart: always
+    env_file:
+      - ./.env
     environment:
       - NAMESRV_ADDR=rmq_namesrv:9876
       - HEAP_OPTS=-Xms128M -Xmx256M -Xmn128M
@@ -149,9 +152,12 @@ services:
       timeout: 5s
       retries: 5
   rmq_broker:
-    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/rocketmq:5.3.2
+    image: apache/rocketmq:5.3.2
     container_name: rmq_broker
     restart: always
+    user: "${UID}:${GID}"
+    env_file:
+      - ./.env
     environment:
       - NAMESRV_ADDR=rmq_namesrv:9876
       - HEAP_OPTS=-Xms256M -Xmx512M -Xmn256M -XX:MaxDirectMemorySize=128M
@@ -172,11 +178,14 @@ services:
       timeout: 5s
       retries: 5
   rmq_proxy:
-    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/rocketmq:5.3.2
+    image: apache/rocketmq:5.3.2
     container_name: rmq_proxy
     restart: always
+    user: "${UID}:${GID}"
     volumes:
       - ${MIDDLEWARE_HOME:-.}/conf/rocketmq:/home/rocketmq/conf
+    env_file:
+      - ./.env
     environment:
       - NAMESRV_ADDR=rmq_namesrv:9876
       - HEAP_OPTS=-Xms128M -Xmx256M -Xmn128M
@@ -190,7 +199,7 @@ services:
       - "18081:18081"
     command: sh mqproxy -pc /home/rocketmq/conf/rmq-proxy.json
   init-topic:
-    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/apache/rocketmq:5.3.2
+    image: apache/rocketmq:5.3.2
     container_name: rmq-init-topic
     restart: "no"
     depends_on:

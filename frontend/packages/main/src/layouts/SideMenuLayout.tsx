@@ -17,6 +17,7 @@ import {
   DatabaseOutlined,
   ToolOutlined,
   BuildOutlined,
+  SwapOutlined,
 } from '@ant-design/icons';
 import favicon from '../favicon.svg';
 import $i18n from '@/i18n';
@@ -163,7 +164,7 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
         key: 'studio',
         label: $i18n.get({
           id: 'main.layouts.SideMenu.studio',
-          dm: 'Studio',
+          dm: ' Agent Builder',
         }),
         icon: <AppstoreOutlined />,
         children: [
@@ -197,6 +198,14 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
               dm: '知识库',
             }),
             icon: <DatabaseOutlined />,
+          },
+          {
+            key: '/dify',
+            label: $i18n.get({
+              id: 'main.layouts.SideMenu.dify',
+              dm: 'Dify To Graph',
+            }),
+            icon: <SwapOutlined />,
           },
         ],
       },

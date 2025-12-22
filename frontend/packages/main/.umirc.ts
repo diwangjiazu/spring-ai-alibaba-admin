@@ -149,6 +149,10 @@ export default defineConfig({
       component: 'Knowledge/Detail/SliceEditing/index',
     },
     {
+      path: '/setting',
+      redirect: '/setting/modelService',
+    },
+    {
       path: '/setting/modelService',
       component: 'Setting/ModelService',
     },
@@ -170,12 +174,22 @@ export default defineConfig({
     },
   ],
   clickToComponent: {},
-  tailwindcss: {},
+  // tailwindcss: {},
   esbuildMinifyIIFE: true,
   mfsu: false,
-  plugins: ['@umijs/plugins/dist/tailwindcss'],
+  plugins: [
+    // '@umijs/plugins/dist/tailwindcss'
+  ],
   proxy: {
     '/api': {
+      target: process.env.WEB_SERVER || 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '/console': {
+      target: process.env.WEB_SERVER || 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '/oauth2': {
       target: process.env.WEB_SERVER || 'http://localhost:8080',
       changeOrigin: true,
     },

@@ -29,6 +29,7 @@ export class Chat extends EventEmitter {
   public draft: boolean;
   public cacheMessage: IReceiveMessage | null = null;
   private messages: IMessage[] = []; // history message list
+  private currentTraceId: string | null = null; // Current trace ID from response header
 
   constructor(opts: IChatOpts) {
     super();
@@ -118,8 +119,13 @@ export class Chat extends EventEmitter {
         is_draft: this.draft,
       },
       {
-        onopen: () => {
+        onopen: (response: Response) => {
           this.cacheMessage = null;
+          // Extract traceId from response header (X-Request-ID)
+          const traceId = response.headers.get('X-Request-ID');
+          if (traceId) {
+            this.currentTraceId = traceId;
+          }
           this.timer = setInterval(() => {
             this.countTime++;
             if (this.countTime === params.timeout) {
@@ -158,6 +164,15 @@ export class Chat extends EventEmitter {
                 if (!this.cacheMessage?.message) {
                   this.cacheMessage.message = {};
                 }
+                // Add traceId to message if available (from SSE message or response header)
+                if (parsed.trace_id) {
+                  this.cacheMessage.trace_id = parsed.trace_id;
+                  this.currentTraceId = parsed.trace_id;
+                  console.log('[SSE] traceId from message:', parsed.trace_id);
+                } else if (this.currentTraceId) {
+                  this.cacheMessage.trace_id = this.currentTraceId;
+                  console.log('[SSE] traceId from header:', this.currentTraceId);
+                }
               } else {
                 this.cacheMessage.usage = parsed.usage;
                 // parse the deep thinking
@@ -186,6 +201,20 @@ export class Chat extends EventEmitter {
                 ...parsed,
                 ...this.cacheMessage,
               };
+              // Ensure traceId is included (prefer from parsed message, fallback to currentTraceId)
+              if (parsed.trace_id) {
+                concatedMessage.trace_id = parsed.trace_id;
+                this.currentTraceId = parsed.trace_id;
+              } else if (this.currentTraceId && !concatedMessage.trace_id) {
+                concatedMessage.trace_id = this.currentTraceId;
+              }
+              // Also merge traceId from cacheMessage if it exists
+              if (!concatedMessage.trace_id && this.cacheMessage?.trace_id) {
+                concatedMessage.trace_id = this.cacheMessage.trace_id;
+              }
+              if (concatedMessage.trace_id) {
+                console.log('[SSE] Final traceId in message:', concatedMessage.trace_id);
+              }
               this.cacheMessage = concatedMessage;
               this.emit('message', concatedMessage);
             }
@@ -205,6 +234,15 @@ export class Chat extends EventEmitter {
         },
         onclose: () => {
           console.log('[sse]close');
+          // Ensure traceId is included in final message
+          if (this.cacheMessage) {
+            if (this.currentTraceId && !this.cacheMessage.trace_id) {
+              this.cacheMessage.trace_id = this.currentTraceId;
+            }
+            if (this.cacheMessage.trace_id) {
+              console.log('[SSE] Final traceId in cacheMessage:', this.cacheMessage.trace_id);
+            }
+          }
           this.messages.push({
             role: 'assistant',
             content: this.cacheMessage?.message?.content,
@@ -212,6 +250,7 @@ export class Chat extends EventEmitter {
           });
           this.emit('close', this.cacheMessage);
           this.cacheMessage = null;
+          this.currentTraceId = null;
         },
         onerror: (err: any) => {
           // error of the sse link itself

@@ -24,6 +24,7 @@ import API from '../../../services';
 import { ModelsContext } from '../../../context/models';
 import dayjs from 'dayjs';
 import { extractParametersFromDoubleBrace, safeJSONParse, safeJSONStringify } from '../../../utils/util';
+import { buildLegacyPath } from '../../../utils/path';
 import AddFunctionModal from './add-function-modal/add-function-modal';
 import ViewFunctionModel from './view-function-model/view-function-model';
 import FunctionList from './FunctionList';
@@ -135,7 +136,7 @@ const PromptDetailPage = () => {
   // 加载 Prompt 详情
   const loadPromptDetail = useCallback(async () => {
     if (!promptKey) {
-      navigate('/prompts');
+      navigate(buildLegacyPath('/prompts'));
       return;
     }
 
@@ -969,7 +970,7 @@ const PromptDetailPage = () => {
             <Button type="primary" key="retry" onClick={() => loadPromptDetail()}>
               重试
             </Button>,
-            <Button key="back" onClick={() => navigate('/prompts')}>
+            <Button key="back" onClick={() => navigate(buildLegacyPath('/prompts'))}>
               返回列表
             </Button>,
           ]}
@@ -986,7 +987,7 @@ const PromptDetailPage = () => {
           title="Prompt 不存在"
           subTitle="未找到指定的 Prompt，可能已被删除或不存在。"
           extra={
-            <Button type="primary" onClick={() => navigate('/prompts')}>
+            <Button type="primary" onClick={() => navigate(buildLegacyPath('/prompts'))}>
               返回列表
             </Button>
           }
@@ -1006,7 +1007,7 @@ const PromptDetailPage = () => {
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/prompts')}
+            onClick={() => navigate(buildLegacyPath('/prompts'))}
             size="large"
           />
           <Title level={2} className='m-0' >{currentPrompt.promptKey}</Title>
@@ -1214,7 +1215,7 @@ const PromptDetailPage = () => {
                           <Button
                             icon={<HistoryOutlined />}
                             size={promptInstances.length >= 3 ? "small" : "default"}
-                            onClick={() => navigate(`/version-history?promptKey=${promptKey}&targetWindowId=${prompt.id}`)}
+                            onClick={() => navigate(buildLegacyPath('/version-history', { promptKey, targetWindowId: prompt.id }))}
                           >
                             {promptInstances.length >= 3 ? '历史' : '版本记录'}
                           </Button>
@@ -1648,7 +1649,7 @@ const PromptDetailPage = () => {
                                                 size="small"
                                                 icon={<ShareAltOutlined />}
                                                 onClick={() => {
-                                                  navigate("/tracing", {
+                                                  navigate(buildLegacyPath("/tracing"), {
                                                     state: {
                                                       traceId: message.traceId
                                                     }

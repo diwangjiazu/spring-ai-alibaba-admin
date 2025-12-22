@@ -1,7 +1,7 @@
 package com.alibaba.cloud.ai.studio.admin.controller;
 
 import com.alibaba.cloud.ai.studio.admin.common.PageResult;
-import com.alibaba.cloud.ai.studio.admin.common.Result;
+import com.alibaba.cloud.ai.studio.runtime.domain.Result;
 import com.alibaba.cloud.ai.studio.admin.dto.ExperimentEvaluatorResultDetail;
 import com.alibaba.cloud.ai.studio.admin.dto.request.ExperimentCreateRequest;
 import com.alibaba.cloud.ai.studio.admin.dto.Experiment;

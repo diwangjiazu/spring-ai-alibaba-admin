@@ -354,8 +354,9 @@ public class TracingRepositoryImpl implements TracingRepository {
                     Aggregate totalTokensAgg = bucket.aggregations().get("total_tokens");
                     if (totalTokensAgg != null && totalTokensAgg.isSum()) {
                         SumAggregate sum = totalTokensAgg.sum();
-                        total += sum.value().longValue();
-                    }
+                        Double value = sum.value();
+						total += value.longValue();
+					}
                 }
                 
                 if (detail) {
@@ -366,8 +367,9 @@ public class TracingRepositoryImpl implements TracingRepository {
                             Aggregate totalTokensAgg = bucket.aggregations().get("total_tokens");
                             if (totalTokensAgg != null && totalTokensAgg.isSum()) {
                                 SumAggregate sum = totalTokensAgg.sum();
-                                tokens = sum.value().longValue();
-                            }
+                                Double value = sum.value();
+								tokens = value.longValue();
+							}
                             return OverviewStatsDTO.StatItem.builder()
                                 .modelName(modelName)
                                 .total(tokens)

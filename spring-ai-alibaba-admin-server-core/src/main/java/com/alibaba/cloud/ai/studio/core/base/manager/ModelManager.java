@@ -182,6 +182,65 @@ public class ModelManager {
 	}
 
 	/**
+	 * Query enabled models from enabled providers
+	 * @return List of enabled model configurations
+	 */
+	public List<ModelConfigInfo> queryEnabledModels() {
+		RequestContext context = RequestContextHolder.getRequestContext();
+		// Get all enabled providers
+		List<ProviderConfigInfo> enabledProviders = providerManager.queryProviders(null).stream()
+				.filter(provider -> Boolean.TRUE.equals(provider.getEnable()))
+				.collect(Collectors.toList());
+		
+		if (enabledProviders.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		// Get all enabled models from enabled providers
+		QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("workspace_id", context.getWorkspaceId());
+		queryWrapper.eq("enable", true);
+		List<String> enabledProviderNames = enabledProviders.stream()
+				.map(ProviderConfigInfo::getProvider)
+				.collect(Collectors.toList());
+		if (!enabledProviderNames.isEmpty()) {
+			queryWrapper.in("provider", enabledProviderNames);
+		}
+		
+		List<ModelEntity> modelEntities = modelMapper.selectList(queryWrapper);
+		return modelEntities.stream().map(this::convertToModelConfigInfo).collect(Collectors.toList());
+	}
+
+	/**
+	 * Query enabled model entities from enabled providers (returns entities with id field)
+	 * @return List of enabled model entities
+	 */
+	public List<ModelEntity> queryEnabledModelEntities() {
+		RequestContext context = RequestContextHolder.getRequestContext();
+		// Get all enabled providers
+		List<ProviderConfigInfo> enabledProviders = providerManager.queryProviders(null).stream()
+				.filter(provider -> Boolean.TRUE.equals(provider.getEnable()))
+				.collect(Collectors.toList());
+		
+		if (enabledProviders.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		// Get all enabled models from enabled providers
+		QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("workspace_id", context.getWorkspaceId());
+		queryWrapper.eq("enable", true);
+		List<String> enabledProviderNames = enabledProviders.stream()
+				.map(ProviderConfigInfo::getProvider)
+				.collect(Collectors.toList());
+		if (!enabledProviderNames.isEmpty()) {
+			queryWrapper.in("provider", enabledProviderNames);
+		}
+		
+		return modelMapper.selectList(queryWrapper);
+	}
+
+	/**
 	 * Get model details
 	 * @param provider Model provider
 	 * @param modelId Model ID
@@ -210,6 +269,48 @@ public class ModelManager {
 			log.error("获取模型详情失败: " + e.getMessage(), e);
 			return null;
 		}
+	}
+
+	/**
+	 * Find model entity by id (Long) or name (String)
+	 * @param modelIdOrName Model ID (Long) or model name (String)
+	 * @return Model entity if found, null otherwise
+	 */
+	public ModelEntity findModelByIdOrName(Object modelIdOrName) {
+		RequestContext context = RequestContextHolder.getRequestContext();
+		String workspaceId = (context != null) ? context.getWorkspaceId() : null;
+		return findModelByIdOrName(modelIdOrName, workspaceId);
+	}
+
+	/**
+	 * Find model entity by id (Long) or name (String) with optional workspaceId
+	 * @param modelIdOrName Model ID (Long) or model name (String)
+	 * @param workspaceId Optional workspace ID, if null then workspace filter is not applied
+	 * @return Model entity if found, null otherwise
+	 */
+	public ModelEntity findModelByIdOrName(Object modelIdOrName, String workspaceId) {
+		if (modelIdOrName == null) {
+			return null;
+		}
+		
+		QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
+		// 只有当 workspaceId 不为 null 时才添加过滤条件
+		if (StringUtils.isNotBlank(workspaceId)) {
+			queryWrapper.eq("workspace_id", workspaceId);
+		}
+		
+		if (modelIdOrName instanceof Long) {
+			// 通过 id 查找
+			queryWrapper.eq("id", modelIdOrName);
+		} else if (modelIdOrName instanceof String) {
+			// 通过 name 或 model_id 查找
+			String value = (String) modelIdOrName;
+			queryWrapper.and(wrapper -> wrapper.eq("name", value).or().eq("model_id", value));
+		} else {
+			return null;
+		}
+		
+		return modelMapper.selectOne(queryWrapper);
 	}
 
 	/**

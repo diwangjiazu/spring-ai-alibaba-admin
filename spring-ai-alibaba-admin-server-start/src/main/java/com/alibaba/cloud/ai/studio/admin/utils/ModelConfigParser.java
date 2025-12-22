@@ -2,6 +2,10 @@ package com.alibaba.cloud.ai.studio.admin.utils;
 
 import com.alibaba.cloud.ai.studio.admin.dto.ModelConfigInfo;
 import com.alibaba.cloud.ai.studio.admin.repository.ModelConfigRepository;
+import com.alibaba.cloud.ai.studio.core.base.manager.ModelManager;
+import com.alibaba.cloud.ai.studio.core.base.entity.ModelEntity;
+import com.alibaba.cloud.ai.studio.core.context.RequestContextHolder;
+import com.alibaba.cloud.ai.studio.runtime.domain.RequestContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,8 @@ public class ModelConfigParser {
     private final ObjectMapper objectMapper;
     
     private final ModelConfigRepository modelConfigRepository;
+    
+    private final ModelManager modelManager;
     
     /**
      * 解析模型配置JSON字符串
@@ -45,9 +51,51 @@ public class ModelConfigParser {
         try {
             modelConfigInfo = parseModelConfig(modelConfig);
             validateModelConfig(modelConfigInfo);
-            // 3. 验证模型配置是否存在
-            if (!modelConfigRepository.existsById(modelConfigInfo.getModelId())) {
-                throw new IllegalArgumentException("模型配置不存在: " + modelConfigInfo.getModelId());
+            
+            // 验证模型配置是否存在
+            // 首先尝试从 ModelConfigRepository (YAML 文件) 查找
+            boolean exists = modelConfigRepository.existsById(modelConfigInfo.getModelId());
+            
+            if (!exists) {
+                // 如果 ModelConfigRepository 中不存在，尝试从 ModelManager (数据库) 查找
+                // 安全地获取 workspaceId
+                String workspaceId = null;
+                try {
+                    RequestContext context = RequestContextHolder.getRequestContext();
+                    if (context != null) {
+                        workspaceId = context.getWorkspaceId();
+                    }
+                } catch (Exception e) {
+                    log.warn("无法获取 RequestContext 的 workspaceId，将不使用 workspace 过滤: {}", e.getMessage());
+                }
+                
+                ModelEntity modelEntity = null;
+                
+                // 1. 首先尝试通过 modelId (Long) 作为 ModelEntity 的 id 查找
+                if (modelConfigInfo.getModelId() != null) {
+                    modelEntity = modelManager.findModelByIdOrName(modelConfigInfo.getModelId(), workspaceId);
+                }
+                
+                // 2. 如果通过 modelId 找不到，尝试通过 modelName 查找
+                if (modelEntity == null) {
+                    String modelName = (String) modelConfigInfo.getParameter("modelName");
+                    if (StringUtils.hasText(modelName)) {
+                        modelEntity = modelManager.findModelByIdOrName(modelName, workspaceId);
+                    }
+                }
+                
+                // 3. 如果还是找不到，抛出异常
+                if (modelEntity == null) {
+                    throw new IllegalArgumentException("模型配置不存在: modelId=" + modelConfigInfo.getModelId() + 
+                        (modelConfigInfo.getParameter("modelName") != null ? ", modelName=" + modelConfigInfo.getParameter("modelName") : ""));
+                }
+                
+                // 如果从 ModelManager 找到了模型，更新 modelConfigInfo 的 modelId 为 ModelEntity 的 id
+                log.info("从 ModelManager 找到模型: id={}, name={}, modelId={}, workspaceId={}", 
+                    modelEntity.getId(), modelEntity.getName(), modelEntity.getModelId(), workspaceId);
+                
+                // 更新 modelId 为 ModelEntity 的 id，确保后续使用正确的 id
+                modelConfigInfo.setModelId(modelEntity.getId());
             }
         } catch (Exception e) {
             log.error("解析模型配置失败: modelConfig={}", modelConfig, e);

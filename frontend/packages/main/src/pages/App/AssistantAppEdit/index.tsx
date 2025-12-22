@@ -14,6 +14,7 @@ import { getKnowledgeListByCodes } from '@/services/knowledge';
 import { listMcpServersByCodes } from '@/services/mcp';
 import { getModelDetail } from '@/services/modelService';
 import { getPluginToolsByIds } from '@/services/plugin';
+import { convertDifyToSpringAI } from '@/services/difyConverter';
 import { IAppComponentListItem } from '@/types/appComponent';
 import {
   IAppStatus,
@@ -29,7 +30,7 @@ import { IModel } from '@/types/modelService';
 import { PluginTool } from '@/types/plugin';
 import { Empty, IconFont, renderTooltip } from '@spark-ai/design';
 import { useDebounceFn, useSetState } from 'ahooks';
-import { Flex, Spin, Typography } from 'antd';
+import { Flex, Spin, Typography, message } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
@@ -329,6 +330,181 @@ export default function AssistantAppEdit() {
     );
   };
 
+  // 将前端应用详情转换为后端期望的 Agent DSL 格式
+  const convertToAgentDSL = (appDetail: IAssistantAppDetailWithInfos): any => {
+    const config = appDetail.config;
+
+    // 构建 agent DSL 对象
+    const agentDSL: any = {
+      mode: 'agent',
+      name: appDetail.name || 'agent',
+      description: appDetail.description || '',
+      type: 'ReactAgent', // 默认使用 ReactAgent，可以根据实际情况调整
+      instruction: config.instructions || '',
+    };
+
+    // 构建 LLM 配置
+    if (config.model) {
+      const modelId = typeof config.model === 'string'
+        ? config.model
+        : config.model.model_id;
+
+      if (modelId) {
+        agentDSL.llm = {
+          model: modelId,
+        };
+
+        // 添加模型参数配置
+        if (config.parameter) {
+          const options: any = {};
+          if (config.parameter.temperature !== undefined) {
+            options.temperature = config.parameter.temperature;
+          }
+          if (config.parameter.max_tokens !== undefined) {
+            options.maxTokens = config.parameter.max_tokens;
+          }
+          if (config.parameter.top_p !== undefined) {
+            options.topP = config.parameter.top_p;
+          }
+          if (Object.keys(options).length > 0) {
+            agentDSL.llm.options = options;
+          }
+        }
+      }
+    }
+
+    // 构建工具列表
+    const tools: string[] = [];
+
+    // 添加插件工具
+    if (config.tools && config.tools.length > 0) {
+      config.tools.forEach((tool) => {
+        if (tool.tool_id) {
+          tools.push(tool.tool_id);
+        }
+      });
+    }
+
+    // 添加 MCP 工具
+    if (config.mcp_servers && config.mcp_servers.length > 0) {
+      config.mcp_servers.forEach((server) => {
+        if (server.server_code) {
+          tools.push(`mcp:${server.server_code}`);
+        }
+      });
+    }
+
+    // 添加 Agent 组件
+    if (config.agent_components && config.agent_components.length > 0) {
+      config.agent_components.forEach((component) => {
+        if (component.code) {
+          tools.push(`agent_component:${component.code}`);
+        }
+      });
+    }
+
+    // 添加 Workflow 组件
+    if (config.workflow_components && config.workflow_components.length > 0) {
+      config.workflow_components.forEach((component) => {
+        if (component.code) {
+          tools.push(`workflow_component:${component.code}`);
+        }
+      });
+    }
+
+    if (tools.length > 0) {
+      agentDSL.tools = tools;
+    }
+
+    // 构建 handle 配置（透传字段，用于存储额外的配置信息）
+    const handle: any = {};
+
+    // 文件搜索配置
+    if (config.file_search?.enable_search) {
+      handle.file_search = {
+        enable_search: config.file_search.enable_search,
+        enable_citation: config.file_search.enable_citation,
+        top_k: config.file_search.top_k,
+        similarity_threshold: config.file_search.similarity_threshold,
+        kb_ids: config.file_search.kb_ids || [],
+      };
+    }
+
+    // 记忆配置
+    if (config.memory) {
+      handle.memory = {
+        dialog_round: config.memory.dialog_round,
+      };
+    }
+
+    // 提示变量
+    if (config.prompt_variables && config.prompt_variables.length > 0) {
+      handle.prompt_variables = config.prompt_variables;
+    }
+
+    // 开场白配置
+    if (config.prologue) {
+      handle.prologue = config.prologue;
+    }
+
+    if (Object.keys(handle).length > 0) {
+      agentDSL.handle = handle;
+    }
+
+    return agentDSL;
+  };
+
+  const handleExportSAA = async () => {
+    if (!cacheAppDetailWithInfo.current) return;
+
+    setState({ saveLoading: true });
+    try {
+      // 将前端应用详情转换为后端期望的 Agent DSL 格式
+      const appDetail = cacheAppDetailWithInfo.current;
+      const agentDSL = convertToAgentDSL(appDetail);
+
+      // 准备请求参数
+      const params: any = {
+        dependencies: 'spring-ai-alibaba-graph,web,spring-ai-alibaba-starter-dashscope,spring-ai-starter-mcp-client',
+        appMode: 'agent',
+        dslDialectType: 'saa-agent',
+        type: 'maven-project',
+        language: 'java',
+        bootVersion: '3.5.0',
+        baseDir: 'demo',
+        groupId: 'com.example',
+        artifactId: 'demo',
+        name: 'demo',
+        description: 'Demo project for Spring Boot',
+        packageName: 'com.example.demo',
+        packaging: 'jar',
+        javaVersion: '17',
+        dsl: JSON.stringify(agentDSL),
+      };
+
+      // 调用转换服务
+      const response = await convertDifyToSpringAI(params);
+
+      // 处理 zip 文件下载
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'spring-ai-alibaba-demo.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      message.success('转换成功！项目文件已开始下载');
+    } catch (error: any) {
+      console.error('转换失败:', error);
+      message.error(`转换失败：${error.message || '请重试'}`);
+    } finally {
+      setState({ saveLoading: false });
+    }
+  };
+
   useEffect(() => {
     // when the conversation is in progress, close the history panel
     if (state.flushing) {
@@ -383,6 +559,7 @@ export default function AssistantAppEdit() {
         getSaveData,
         refreshAppDetail,
         sparkChatComponentRef,
+        handleExportSAA,
       }}
     >
       <div className={styles.page}>

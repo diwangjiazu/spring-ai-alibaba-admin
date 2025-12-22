@@ -15,6 +15,7 @@
  */
 package com.alibaba.cloud.ai.studio.admin.builder.generator.service.generator.agent;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,8 +63,11 @@ public abstract class AbstractAgentTypeProvider implements AgentTypeProvider {
 	@SuppressWarnings("unchecked")
 	protected Map<String, Object> requireHandle(Map<String, Object> root) {
 		Map<String, Object> handle = (Map<String, Object>) root.get("handle");
+//		if (handle == null) {
+//			throw new IllegalArgumentException(type() + " requires 'handle' configuration");
+//		}
 		if (handle == null) {
-			throw new IllegalArgumentException(type() + " requires 'handle' configuration");
+			handle = new HashMap<>();
 		}
 		return handle;
 	}
