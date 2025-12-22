@@ -67,18 +67,18 @@ Agent Studio is an AI Agent development and evaluation platform based on Spring 
 
 ```bash
 git clone https://github.com/spring-ai-alibaba/spring-ai-alibaba-admin.git
-cd admin
+cd spring-ai-alibaba-admin
 ```
 
 #### 2. Configure Your API Keys
-Modify the model configuration in `spring-ai-alibaba-admin-server/model-config.yaml` according to your model provider.
+Modify the model configuration in `spring-ai-alibaba-admin-server-start/model-config.yaml` according to your model provider.
 - If you use DashScope, please refer to the model-config-dashscope.yaml template for configuration
 - If you use DeepSeek, please refer to the model-config-deepseek.yaml template for configuration
 - If you use OpenAI, please refer to the model-config-openai.yaml template for configuration
 > 💡 **Get Your DashScope API Key**: Visit [Alibaba Cloud Bailian Console](https://bailian.console.aliyun.com/?tab=model#/api-key) to get a free API key.
 
 #### 3. Nacos Configuration (Optional)
-If you need to modify the Nacos address, please update the configuration in the `spring-ai-alibaba-admin-server/src/main/resources/application.yml` file
+If you need to modify the Nacos address, please update the configuration in the `spring-ai-alibaba-admin-server-start/src/main/resources/application.yml` file
 ```yaml
 nacos:
   server-addr: ${nacos-address}
@@ -90,7 +90,7 @@ Execute the startup script in the root directory. This script will help you star
 ```bash
 sh start.sh
 ```
-Start the application in the spring-ai-alibaba-admin-server directory
+Start the application in the spring-ai-alibaba-admin-server-start directory
 ```bash
 mvn spring-boot:run
 ```

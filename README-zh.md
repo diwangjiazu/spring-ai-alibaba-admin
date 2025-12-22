@@ -72,18 +72,18 @@ Spring AI Alibaba Admin 是一个基于 Spring AI Alibaba 的 AI Agent 开发与
 
 ```bash
 git clone https://github.com/spring-ai-alibaba/spring-ai-alibaba-admin.git
-cd admin
+cd spring-ai-alibaba-admin
 ```
 
 #### 2. 配置您的 API 密钥
-根据您的模型供应商，修改 `spring-ai-alibaba-admin-server/model-config.yaml` 的模型配置。
+根据您的模型供应商，修改 `spring-ai-alibaba-admin-server-start/model-config.yaml` 的模型配置。
 - 如果您使用DashScope，请参照model-config-dashscope.yaml模版进行配置
 - 如果您使用DeepSeek，请参照model-config-deepseek.yaml模版进行配置
 - 如果您使用OpenAI，请参照model-config-openai.yaml模版进行配置
 > 💡 **获取您的 DashScope API 密钥**: 访问 [阿里云百炼控制台](https://bailian.console.aliyun.com/?tab=model#/api-key) 获取免费 API 密钥。
 
 #### 3. nacos配置（可选）
-如果您需要修改nacos地址，请更新spring-ai-alibaba-admin-server/src/main/resources/application.yml文件中的配置
+如果您需要修改nacos地址，请更新spring-ai-alibaba-admin-server-start/src/main/resources/application.yml文件中的配置
 ```yaml
 nacos:
   server-addr: ${nacos地址}
@@ -95,7 +95,7 @@ nacos:
 ```bash
 sh start.sh
 ```
-spring-ai-alibaba-admin-server 目录下启动应用程序
+spring-ai-alibaba-admin-server-start 目录下启动应用程序
 ```bash
 mvn spring-boot:run
 ```

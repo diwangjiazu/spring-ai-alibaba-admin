@@ -28,3 +28,7 @@ fi
 if [ -d kibana/data ]; then
     sudo chmod -R 777 kibana/data 2>/dev/null || chmod -R 777 kibana/data
 fi
+
+# Start containers with docker compose
+echo "Starting containers with docker compose..."
+docker compose up -d --build
