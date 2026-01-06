@@ -55,7 +55,7 @@ check_cluster_health() {
     log_info "检查 Elasticsearch 集群健康状态..."
     
     while [ $retry_count -lt $HEALTH_CHECK_RETRIES ]; do
-        local health_status=$(curl -s "http://elasticsearch:9200/_cluster/health" 2>/dev/null)
+        local health_status=$(curl -s "http://localhost:9200/_cluster/health" 2>/dev/null)
         
         if [ $? -eq 0 ] && echo "$health_status" | grep -q '"status":"green"\|"status":"yellow"'; then
             local status=$(echo "$health_status" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
@@ -76,7 +76,7 @@ check_cluster_health() {
 
 # 等待 Elasticsearch 启动
 log_info "等待 Elasticsearch 启动..."
-until curl -s http://elasticsearch:9200/_cluster/health > /dev/null 2>&1; do
+until curl -s http://localhost:9200/_cluster/health > /dev/null 2>&1; do
     log_info "等待 Elasticsearch 启动..."
     sleep 5
 done
@@ -93,7 +93,7 @@ log_info "开始创建索引和配置..."
 
 # 创建 pipeline
 log_info "创建 parsing_loongsuite_traces pipeline..."
-pipeline_command='curl -X PUT "http://elasticsearch:9200/_ingest/pipeline/parsing_loongsuite_traces" \
+pipeline_command='curl -X PUT "http://localhost:9200/_ingest/pipeline/parsing_loongsuite_traces" \
   -H "Content-Type: application/json" \
   -d '"'"'{
     "processors": [
@@ -152,7 +152,7 @@ fi
 
 # 验证 pipeline 创建成功
 log_info "验证 pipeline 创建是否成功..."
-pipeline_verification_command='curl -s -f "http://elasticsearch:9200/_ingest/pipeline/parsing_loongsuite_traces" > /dev/null'
+pipeline_verification_command='curl -s -f "http://localhost:9200/_ingest/pipeline/parsing_loongsuite_traces" > /dev/null'
 
 if ! retry_operation "验证 pipeline 创建" "$pipeline_verification_command"; then
     log_error "Pipeline 验证失败，退出初始化"
@@ -161,7 +161,7 @@ fi
 
 # 创建索引
 log_info "创建 loongsuite_traces 索引..."
-index_command='curl -X PUT "http://elasticsearch:9200/loongsuite_traces" \
+index_command='curl -X PUT "http://localhost:9200/loongsuite_traces" \
   -H "Content-Type: application/json" \
   -d '"'"'{
     "settings": {
@@ -294,7 +294,7 @@ sleep 5
 
 # 验证索引创建成功
 log_info "验证索引创建是否成功..."
-verification_command='curl -s -f "http://elasticsearch:9200/loongsuite_traces/_mapping" > /dev/null'
+verification_command='curl -s -f "http://localhost:9200/loongsuite_traces/_mapping" > /dev/null'
 
 if ! retry_operation "验证索引创建" "$verification_command"; then
     log_error "索引验证失败，退出初始化"
@@ -303,7 +303,7 @@ fi
 
 # 最终验证：检查索引状态
 log_info "检查索引状态..."
-index_status_command='curl -s "http://elasticsearch:9200/_cat/indices/loongsuite_traces?v"'
+index_status_command='curl -s "http://localhost:9200/_cat/indices/loongsuite_traces?v"'
 
 if ! retry_operation "检查索引状态" "$index_status_command"; then
     log_error "索引状态检查失败，退出初始化"

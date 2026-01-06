@@ -5,8 +5,8 @@ services:
   mysql:
     container_name: mysql
     restart: always
-    image: sca-registry.cn-hangzhou.cr.aliyuncs.com/dubbo/mysql:8.0.35
-    user: "${UID}:${GID}"
+    image: mysql:8.0
+    #user: "${UID}:${GID}"
     env_file:
       - ./mysql.env
     environment:
@@ -25,7 +25,7 @@ services:
       retries: 10
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.2
+    image: elasticsearch:9.1.2
     container_name: elasticsearch
     restart: always
     environment:
@@ -61,7 +61,7 @@ services:
       - o11y-network
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.1.2
+    image: kibana:9.1.2
     container_name: kibana
     restart: always
     environment:
@@ -90,7 +90,7 @@ services:
       - o11y-network
 
   loongcollector:
-    image: sls-opensource-registry.cn-shanghai.cr.aliyuncs.com/loongcollector-community-edition/loongcollector:3.1.4
+    image: clouddetail/loongcollector-alpha:v3.14.0-1
     container_name: loongcollector
     restart: always
     depends_on:
@@ -122,7 +122,7 @@ services:
 
   redis:
     restart: always
-    image: redis:7.2.5
+    image: redis:7.2
     container_name: redis
     ports:
       - "6379:6379"
@@ -134,7 +134,7 @@ services:
   rmq_namesrv:
     image: apache/rocketmq:5.3.2
     container_name: rmq_namesrv
-    user: "${UID}:${GID}"
+    #user: "${UID}:${GID}"
     restart: always
     env_file:
       - ./.env
@@ -155,7 +155,7 @@ services:
     image: apache/rocketmq:5.3.2
     container_name: rmq_broker
     restart: always
-    user: "${UID}:${GID}"
+    #user: "${UID}:${GID}"
     env_file:
       - ./.env
     environment:
@@ -181,7 +181,7 @@ services:
     image: apache/rocketmq:5.3.2
     container_name: rmq_proxy
     restart: always
-    user: "${UID}:${GID}"
+    #user: "${UID}:${GID}"
     volumes:
       - ${MIDDLEWARE_HOME:-.}/conf/rocketmq:/home/rocketmq/conf
     env_file:
